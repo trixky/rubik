@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"fmt"
@@ -33,25 +33,22 @@ const (
 type Cube struct {
 	cornerPos [8]byte
 	cornerOri [8]byte
-	edgePos [12]byte
-	edgeOri [12]byte
-	moves string
+	edgePos   [12]byte
+	edgeOri   [12]byte
+	moves     string
 }
 
-func NewCube() *Cube {
-	c := &Cube {
-		[8]byte{urf, ubr, dlf, dfr, ulb, ufl, drb, dbl},
-		[8]byte{0,0,0,0,0,0,0,0},
-		[12]byte{uf, ur, ub, ul, df, dr, db, dl, fr, br, bl, fl},
-		[12]byte{0,0,0,0,0,0,0,0,0,0,0,0},
-		"",
-	}
-	return c
+func (c *Cube) Initialize() {
+	c.cornerPos = [8]byte{urf, ubr, dlf, dfr, ulb, ufl, drb, dbl}
+	c.cornerOri = [8]byte{0, 0, 0, 0, 0, 0, 0, 0}
+	c.edgePos = [12]byte{uf, ur, ub, ul, df, dr, db, dl, fr, br, bl, fl}
+	c.edgeOri = [12]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	c.moves = ""
 }
 
 func (c *Cube) rotate(face byte, nbRotations int) {
 	fmt.Println(face, nbRotations)
-	switch (face) {
+	switch face {
 	case 'U':
 		c.rotateUp(nbRotations)
 	case 'D':
@@ -68,7 +65,7 @@ func (c *Cube) rotate(face byte, nbRotations int) {
 }
 
 func (c *Cube) rotateUp(nbRotations int) {
-	for i := 0 ; i < nbRotations ; i++ {
+	for i := 0; i < nbRotations; i++ {
 		tmpPos := c.cornerPos[urf]
 		c.cornerPos[urf] = c.cornerPos[ubr]
 		c.cornerPos[ubr] = c.cornerPos[ulb]
@@ -80,7 +77,7 @@ func (c *Cube) rotateUp(nbRotations int) {
 		c.cornerOri[ubr] = c.cornerOri[ulb]
 		c.cornerOri[ulb] = c.cornerOri[ufl]
 		c.cornerOri[ufl] = tmpOri
-		
+
 		tmpPos = c.edgePos[uf]
 		c.edgePos[uf] = c.edgePos[ur]
 		c.edgePos[ur] = c.edgePos[ub]
@@ -96,7 +93,7 @@ func (c *Cube) rotateUp(nbRotations int) {
 }
 
 func (c *Cube) rotateDown(nbRotations int) {
-	for i := 0 ; i < nbRotations ; i++ {
+	for i := 0; i < nbRotations; i++ {
 		tmpPos := c.cornerPos[dfr]
 		c.cornerPos[dfr] = c.cornerPos[dlf]
 		c.cornerPos[dlf] = c.cornerPos[dbl]
@@ -108,7 +105,7 @@ func (c *Cube) rotateDown(nbRotations int) {
 		c.cornerOri[dlf] = c.cornerOri[dbl]
 		c.cornerOri[dbl] = c.cornerOri[drb]
 		c.cornerOri[drb] = tmpOri
-		
+
 		tmpPos = c.edgePos[df]
 		c.edgePos[df] = c.edgePos[dl]
 		c.edgePos[dl] = c.edgePos[db]
@@ -124,7 +121,7 @@ func (c *Cube) rotateDown(nbRotations int) {
 }
 
 func (c *Cube) rotateLeft(nbRotations int) {
-	for i := 0 ; i < nbRotations ; i++ {
+	for i := 0; i < nbRotations; i++ {
 		tmpPos := c.cornerPos[ulb]
 		c.cornerPos[ulb] = c.cornerPos[dbl]
 		c.cornerPos[dbl] = c.cornerPos[dlf]
@@ -152,7 +149,7 @@ func (c *Cube) rotateLeft(nbRotations int) {
 }
 
 func (c *Cube) rotateRight(nbRotations int) {
-	for i := 0 ; i < nbRotations ; i++ {
+	for i := 0; i < nbRotations; i++ {
 		tmpPos := c.cornerPos[urf]
 		c.cornerPos[urf] = c.cornerPos[dfr]
 		c.cornerPos[dfr] = c.cornerPos[drb]
@@ -164,7 +161,7 @@ func (c *Cube) rotateRight(nbRotations int) {
 		c.cornerOri[dfr] = (2 + c.cornerOri[drb]) % 3
 		c.cornerOri[drb] = (1 + c.cornerOri[ubr]) % 3
 		c.cornerOri[ubr] = (2 + tmpOri) % 3
-		
+
 		tmpPos = c.edgePos[ur]
 		c.edgePos[ur] = c.edgePos[fr]
 		c.edgePos[fr] = c.edgePos[dr]
@@ -180,7 +177,7 @@ func (c *Cube) rotateRight(nbRotations int) {
 }
 
 func (c *Cube) rotateFront(nbRotations int) {
-	for i := 0 ; i < nbRotations ; i++ {
+	for i := 0; i < nbRotations; i++ {
 		fmt.Println("front", i)
 		fmt.Println("before", c.cornerPos[urf])
 		fmt.Println("before", c.cornerPos[dfr])
@@ -197,7 +194,7 @@ func (c *Cube) rotateFront(nbRotations int) {
 		c.cornerOri[ufl] = (1 + c.cornerOri[dlf]) % 3
 		c.cornerOri[dlf] = (2 + c.cornerOri[dfr]) % 3
 		c.cornerOri[dfr] = (1 + tmpOri) % 3
-		
+
 		tmpPos = c.edgePos[uf]
 		c.edgePos[uf] = c.edgePos[fl]
 		c.edgePos[fl] = c.edgePos[df]
@@ -213,7 +210,7 @@ func (c *Cube) rotateFront(nbRotations int) {
 }
 
 func (c *Cube) rotateBack(nbRotations int) {
-	for i := 0 ; i < nbRotations ; i++ {
+	for i := 0; i < nbRotations; i++ {
 		tmpPos := c.cornerPos[ubr]
 		c.cornerPos[ubr] = c.cornerPos[drb]
 		c.cornerPos[drb] = c.cornerPos[dbl]
@@ -225,7 +222,7 @@ func (c *Cube) rotateBack(nbRotations int) {
 		c.cornerOri[drb] = (1 + c.cornerOri[dbl]) % 3
 		c.cornerOri[dbl] = (2 + c.cornerOri[ulb]) % 3
 		c.cornerOri[ulb] = (1 + tmpOri) % 3
-		
+
 		tmpPos = c.edgePos[ub]
 		c.edgePos[ub] = c.edgePos[br]
 		c.edgePos[br] = c.edgePos[db]
@@ -240,13 +237,13 @@ func (c *Cube) rotateBack(nbRotations int) {
 	}
 }
 
-func (c *Cube) startPosition(words []string) {
+func (c *Cube) StartPosition(words []string) {
 	for _, s := range words {
 		amount := 1
-		if (len(s) == 2) {
-			if (s[1] == '\'') {
+		if len(s) == 2 {
+			if s[1] == '\'' {
 				amount = 3
-			} else if (s[1] == '2') {
+			} else if s[1] == '2' {
 				amount = 2
 			}
 		}
@@ -254,7 +251,7 @@ func (c *Cube) startPosition(words []string) {
 	}
 }
 
-func (c Cube) print() {
+func (c Cube) Print() {
 	fmt.Println("print cube")
 
 	fmt.Println("corners")
