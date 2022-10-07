@@ -20,4 +20,9 @@ ULB URB URF ULF DLF DLB DRB DRF
 See https://stackoverflow.com/questions/500221/how-would-you-represent-a-rubiks-cube-in-code<br>
 Clearer but more math heavy explanation
 https://people.math.harvard.edu/~jjchen/docs/Group%20Theory%20and%20the%20Rubik%27s%20Cube.pdf<br>
-Even better link https://cube20.org/src/cubepos.pdf
+Even better link https://cube20.org/src/cubepos.pdf<br>
+For id rules https://forum.francocube.com/viewtopic.php?t=5952<br>
+For cube's group identities :<br>
+https://www.jaapsch.net/puzzles/thistle.htm<br>
+https://forum.francocube.com/viewtopic.php?t=5952<br>
+visu fig.3 is cool https://arxiv.org/pdf/1601.05744.pdf<br>
