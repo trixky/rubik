@@ -1,12 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
-		<meta name="viewport" content="width=device-width" />
-		%sveltekit.head%
-	</head>
-	<body>
-		<div>%sveltekit.body%</div>
-	</body>
+
+<head>
+	<meta charset="utf-8" />
+	<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+	<meta name="viewport" content="width=device-width" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+	<style>
+		@font-face {
+			font-family: 'Minecraftia';
+			src: url('/fonts/minecraftia/Minecraftia-Regular.ttf') format('truetype');
+		}
+
+		@font-face {
+			font-family: 'Chistoso';
+			src: url('/fonts/chistoso/Chistoso-Regular.ttf') format('truetype');
+		}
+	</style>
+	%sveltekit.head%
+</head>
+
+<body>
+	<div>%sveltekit.body%</div>
+</body>
+
 </html>

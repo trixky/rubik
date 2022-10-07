@@ -1,0 +1,7 @@
+/* @tailwind base; */
+@tailwind components;
+@tailwind utilities;
+
+button, p {
+    font-size: 0.84em;
+}
