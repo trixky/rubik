@@ -19,7 +19,8 @@ services:
     env_file:
       - ./.env
     volumes:
-      - ./client:/app
+      - ./client/src:/app/src
+      - ./client/static:/app/static
     depends_on:
       - api
     links:
