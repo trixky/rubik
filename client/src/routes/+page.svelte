@@ -4,6 +4,7 @@
 	import ApiPostResolve from '../api/post.resolve';
 	import * as StaticInstructions from '../stores/static/instructions';
 	import SanitizeInput from '../sanitizers/input';
+	import Rubik from '../components/rubik.svelte';
 
 	const screen_rows = 8;
 	const screen_columns = 8;
@@ -236,6 +237,7 @@
 <!-- ========================= HTML -->
 <div class="flow-container">
 	<div class="text-container">
+		<Rubik show={rubik_mode} />
 		<div class="screen" style="opacity: {rubik_mode ? '0.1' : '1'};">
 			{#each output_mode ? $ResultStore : inputs as instruction, index}
 				<p class:selected-input={index === selected && prompt_period} class="screen-instruction">
