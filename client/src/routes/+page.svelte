@@ -4,7 +4,7 @@
 	import ApiPostResolve from '../api/post.resolve';
 	import * as StaticInstructions from '../stores/static/instructions';
 	import SanitizeInput from '../sanitizers/input';
-	import Rubik from '../components/rubik.svelte';
+	import Rubik from '../rubik/rubik.svelte';
 
 	const screen_rows = 8;
 	const screen_columns = 8;
@@ -237,7 +237,6 @@
 <!-- ========================= HTML -->
 <div class="flow-container">
 	<div class="text-container">
-		<Rubik show={rubik_mode} />
 		<div class="screen" style="opacity: {rubik_mode ? '0.1' : '1'};">
 			{#each output_mode ? $ResultStore : inputs as instruction, index}
 				<p class:selected-input={index === selected && prompt_period} class="screen-instruction">
@@ -248,6 +247,7 @@
 				<span class:selected-input={end_selected && prompt_period} class="input">&nbsp;</span>
 			{/if}
 		</div>
+		<Rubik show={rubik_mode} />
 		<div class="clipboard-container">
 			<button on:click={handleCopy}>copy</button>
 			{#if !output_mode}
@@ -349,7 +349,7 @@
 	}
 
 	.screen {
-		@apply grid grid-cols-8 grid-rows-8 m-0 w-[240px] h-[240px] p-3 border-solid border-[1px] border-black rounded-md break-words duration-200;
+		@apply grid grid-cols-8 grid-rows-8 m-0 w-[240px] h-[240px] p-3 border-solid border-[1px] border-black rounded-md break-words duration-300;
 		box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.322);
 		background-color: #c9e9c5;
 	}
@@ -359,7 +359,7 @@
 	}
 
 	.physic-button-container > button {
-		@apply border-solid border-[1px] border-black rounded-md;
+		@apply border-solid border-[1px] rounded-md;
 	}
 
 	.right-rotation {
