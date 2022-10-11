@@ -11,6 +11,7 @@
 	const max_selected_input = max_instructions - 1;
 
 	$: output_mode = $ResultStore.length > 0;
+	let rubik_mode = false;
 
 	let prompt_id = 0;
 	let prompt_period = false;
@@ -50,7 +51,26 @@
 		if (output_mode) {
 			// search
 		} else {
-			if (!end_selected) {
+			const input_selected_value = inputs[input_selected];
+			if (input_selected_value != undefined && input_selected_value[0] === instruction[0]) {
+				const base = instruction[0];
+				switch ((input_selected_value + instruction).replaceAll(base, 'X')) {
+					case 'XX':
+					case "X'X'":
+						inputs[input_selected] = base + '2';
+						break;
+					case 'X2X':
+						inputs[input_selected] = base + "'";
+						break;
+					case "X2X'":
+					case "X'X":
+						inputs[input_selected] = base;
+						break;
+					default:
+						inputs[input_selected] = instruction;
+						break;
+				}
+			} else if (!end_selected) {
 				inputs[input_selected] = instruction;
 			} else if (inputs.length < max_instructions) {
 				inputs = [...inputs, instruction];
@@ -160,6 +180,10 @@
 		}, 500);
 	}
 
+	function handleDimension() {
+		rubik_mode = !rubik_mode;
+	}
+
 	function handleRandom() {
 		if (!output_mode) {
 			function getRandomNumber(min: number, max: number): number {
@@ -212,7 +236,7 @@
 <!-- ========================= HTML -->
 <div class="flow-container">
 	<div class="text-container">
-		<div class="screen">
+		<div class="screen" style="opacity: {rubik_mode ? '0.1' : '1'};">
 			{#each output_mode ? $ResultStore : inputs as instruction, index}
 				<p class:selected-input={index === selected && prompt_period} class="screen-instruction">
 					{instruction}
@@ -252,8 +276,8 @@
 			<button class="physic-button right-rotation special-instruction" on:click={handleRandom}
 				>ran</button
 			>
-			<button class="physic-button right-rotation special-instruction">dim</button>
-			{#each StaticInstructions.instructions as instruction, index}
+			<button class="physic-button right-rotation special-instruction">on</button>
+			{#each StaticInstructions.physical_instructions as instruction, index}
 				<button
 					class="physic-button {index % 6 >= 3 ? 'right-rotation' : 'left-rotation'}"
 					on:click={() => handleInstruction(instruction)}>{instruction.toLocaleLowerCase()}</button
@@ -284,10 +308,23 @@
 				style="rotate: 180deg;"
 				on:click={() => handleVerticalMove(true)}>{'v'}</button
 			>
-			<button
-				class="physic-button special-instruction"
-				style="grid-column: 3 / 5; transform: translateY(5px);"
-				on:click={handleResolve}>ok</button
+			<button class="physic-button left-rotation special-instruction" style="rotate: 180deg;"
+				>...</button
+			>
+			<button class="physic-button left-rotation special-instruction" style="rotate: 180deg;"
+				>...</button
+			>
+			<button class="physic-button left-rotation special-instruction" style="rotate: 180deg;"
+				>...</button
+			>
+			<button class="physic-button right-rotation special-instruction" style="rotate: 180deg;"
+				>...</button
+			>
+			<button class="physic-button right-rotation special-instruction" on:click={handleDimension}
+				>dim</button
+			>
+			<button class="physic-button right-rotation special-instruction" on:click={handleResolve}
+				>ok</button
 			>
 		</div>
 	</div>
@@ -296,7 +333,7 @@
 <!-- ========================= CSS -->
 <style lang="postcss">
 	.imprimed-title {
-		@apply absolute -top-[44px] left-1 ml-3 select-none;
+		@apply absolute -top-[28px] left-2 ml-3 select-none;
 		font-family: 'Chistoso';
 		font-size: 1.1em;
 	}
@@ -310,13 +347,13 @@
 	}
 
 	.screen {
-		@apply grid grid-cols-8 grid-rows-8 m-0 w-[240px] h-[240px] p-3 border-solid border-[1px] border-black rounded-md break-words;
+		@apply grid grid-cols-8 grid-rows-8 m-0 w-[240px] h-[240px] p-3 border-solid border-[1px] border-black rounded-md break-words duration-200;
 		box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.322);
 		background-color: #c9e9c5;
 	}
 
 	.physic-button-container {
-		@apply grid grid-cols-6 grid-rows-7 gap-2 my-5;
+		@apply grid grid-cols-6 grid-rows-5 gap-2 mt-5 mb-0;
 	}
 
 	.physic-button-container > button {
@@ -335,6 +372,14 @@
 		@apply border-none px-[7px] py-[8px] hover:cursor-pointer;
 		font-weight: 500;
 		background-color: azure;
+	}
+
+	.physic-button:hover {
+		filter: brightness(92%);
+	}
+
+	.physic-button:hover:active {
+		filter: brightness(80%);
 	}
 
 	.special-instruction {
@@ -363,12 +408,12 @@
 	}
 
 	.clipboard-container {
-		@apply absolute -top-[33px] right-1 opacity-0 duration-300 p-2 select-none;
+		@apply absolute -top-[34px] right-3 opacity-0 duration-300 p-2 select-none;
 	}
 
 	.clipboard-container:hover,
 	.screen:hover + .clipboard-container {
-		@apply opacity-30;
+		@apply opacity-[15%];
 	}
 
 	.clipboard-container > button {

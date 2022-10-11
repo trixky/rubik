@@ -7,7 +7,7 @@
 
 <!-- ========================= HTML -->
 <Header />
-<main>
+<main class="flex h-full">
 	<slot />
 </main>
 <Footer />
