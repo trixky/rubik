@@ -31,38 +31,70 @@ const (
 )
 
 type Cube struct {
-	cornerPos [8]byte
+	move     string
+	cornerPos [8]uint8
 	cornerOri [8]byte
-	edgePos   [12]byte
+	edgePos   [12]uint8
 	edgeOri   [12]byte
-	moves     string
 }
 
-func (c *Cube) Initialize() {
-	c.cornerPos = [8]byte{urf, ubr, dlf, dfr, ulb, ufl, drb, dbl}
+func (c *Cube) equal(other Cube) bool {
+	if c.cornerPos != other.cornerPos {
+		return false
+	}
+	if c.cornerOri != other.cornerOri {
+		return false
+	}
+	if c.edgePos != other.edgePos {
+		return false
+	}
+	if c.edgeOri != other.edgeOri {
+		return false
+	}
+	return true
+}
+
+func (c *Cube) initialize() {
+	c.move = ""
+	c.cornerPos = [8]uint8{urf, ubr, dlf, dfr, ulb, ufl, drb, dbl}
 	c.cornerOri = [8]byte{0, 0, 0, 0, 0, 0, 0, 0}
-	c.edgePos = [12]byte{uf, ur, ub, ul, df, dr, db, dl, fr, br, bl, fl}
+	c.edgePos = [12]uint8{uf, ur, ub, ul, df, dr, db, dl, fr, br, bl, fl}
 	c.edgeOri = [12]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	c.moves = ""
 }
 
-func (c *Cube) rotate(face byte, nbRotations int) {
-	fmt.Println(face, nbRotations)
-	switch face {
-	case 'U':
-		c.rotateUp(nbRotations)
-	case 'D':
-		c.rotateDown(nbRotations)
-	case 'L':
-		c.rotateLeft(nbRotations)
-	case 'R':
-		c.rotateRight(nbRotations)
-	case 'F':
-		c.rotateFront(nbRotations)
-	case 'B':
-		c.rotateBack(nbRotations)
+
+func (c *Cube) rotateSequence(words []string) {
+	for _, s := range words {
+		c.rotate(s)
 	}
 }
+
+func (c *Cube) rotate(move string) {
+	amount := 1
+	if len(move) == 2 {
+		if move[1] == '\'' {
+			amount = 3
+		} else if move[1] == '2' {
+			amount = 2
+		}
+	}
+	switch move[0] {
+	case 'U':
+		c.rotateUp(amount)
+	case 'D':
+		c.rotateDown(amount)
+	case 'L':
+		c.rotateLeft(amount)
+	case 'R':
+		c.rotateRight(amount)
+	case 'F':
+		c.rotateFront(amount)
+	case 'B':
+		c.rotateBack(amount)
+	}
+	c.move = move
+}
+
 
 func (c *Cube) rotateUp(nbRotations int) {
 	for i := 0; i < nbRotations; i++ {
@@ -178,16 +210,11 @@ func (c *Cube) rotateRight(nbRotations int) {
 
 func (c *Cube) rotateFront(nbRotations int) {
 	for i := 0; i < nbRotations; i++ {
-		fmt.Println("front", i)
-		fmt.Println("before", c.cornerPos[urf])
-		fmt.Println("before", c.cornerPos[dfr])
 		tmpPos := c.cornerPos[urf]
 		c.cornerPos[urf] = c.cornerPos[ufl]
 		c.cornerPos[ufl] = c.cornerPos[dlf]
 		c.cornerPos[dlf] = c.cornerPos[dfr]
 		c.cornerPos[dfr] = tmpPos
-		fmt.Println("after", c.cornerPos[urf])
-		fmt.Println("after", c.cornerPos[dfr])
 
 		tmpOri := c.cornerOri[urf]
 		c.cornerOri[urf] = (2 + c.cornerOri[ufl]) % 3
@@ -237,37 +264,47 @@ func (c *Cube) rotateBack(nbRotations int) {
 	}
 }
 
-func (c *Cube) StartPosition(words []string) {
-	for _, s := range words {
-		amount := 1
-		if len(s) == 2 {
-			if s[1] == '\'' {
-				amount = 3
-			} else if s[1] == '2' {
-				amount = 2
-			}
-		}
-		c.rotate(s[0], amount)
+func makeCubeFromSequence(sequence []string) *Cube {
+	cube := &Cube{}
+	cube.initialize()
+	cube.rotateSequence(sequence)
+	return cube
+}
+
+func copyAndMove(cube *Cube, move string) *Cube {
+	copy := &Cube{
+		move: cube.move,
+		cornerPos: cube.cornerPos,
+		cornerOri: cube.cornerOri,
+		edgePos: cube.edgePos,
+		edgeOri: cube.edgeOri,
 	}
+	copy.rotate(move)
+	return copy
 }
 
 func (c Cube) Print() {
 	fmt.Println("print cube")
 
+	fmt.Println("move:", c.move)
 	fmt.Println("corners")
 	for _, value := range c.cornerPos {
-		fmt.Println(value)
+		fmt.Print(value, " ")
 	}
+	fmt.Println()
 	fmt.Println("corners orientation")
 	for _, value := range c.cornerOri {
-		fmt.Println(value)
+		fmt.Print(value, " ")
 	}
+	fmt.Println()
 	fmt.Println("edges")
 	for _, value := range c.edgePos {
-		fmt.Println(value)
+		fmt.Print(value, " ")
 	}
+	fmt.Println()
 	fmt.Println("edges orientation")
 	for _, value := range c.edgeOri {
-		fmt.Println(value)
+		fmt.Print(value, " ")
 	}
+	fmt.Print("\n")
 }

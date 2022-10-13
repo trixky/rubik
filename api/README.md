@@ -25,4 +25,4 @@ For id rules https://forum.francocube.com/viewtopic.php?t=5952<br>
 For cube's group identities :<br>
 https://www.jaapsch.net/puzzles/thistle.htm<br>
 https://forum.francocube.com/viewtopic.php?t=5952<br>
-visu fig.3 is cool https://arxiv.org/pdf/1601.05744.pdf<br>
+fig.3 is cool https://arxiv.org/pdf/1601.05744.pdf<br>
