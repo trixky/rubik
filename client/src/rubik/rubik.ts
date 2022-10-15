@@ -77,7 +77,7 @@ export class Rubik {
 				});
 
 				await gsap.to(this.pivot.rotation, {
-					duration: Config.duration,
+					duration: Config.moves.duration,
 					[move.axe]: move.reverse ? quarterTurn : -quarterTurn
 				});
 

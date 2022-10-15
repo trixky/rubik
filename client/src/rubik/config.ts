@@ -1,3 +1,8 @@
 export default {
-	duration: 0.2
+	moves: {
+		duration: 0.2
+	},
+	camera: {
+		distance: 14
+	}
 };

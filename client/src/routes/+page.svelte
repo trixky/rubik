@@ -7,7 +7,7 @@
 	import RubikComponent from '../rubik/rubik.svelte';
 	import type { Rubik } from '../rubik/rubik';
 
-	const screen_rows = 8;
+	const screen_rows = 7;
 	const screen_columns = 8;
 	const max_instructions = screen_rows * screen_columns;
 	const max_selected_input = max_instructions - 1;
@@ -25,15 +25,19 @@
 	let selected_output = 0;
 
 	$: selected = output_mode ? selected_output : selected_input;
+	$: instructions = output_mode ? $ResultStore : inputs;
 
 	$: end_selected = output_mode
 		? selected_output === $ResultStore.length
 		: selected_input === inputs.length;
-	$: last_selected_input = output_mode
+	$: last_selected_instruction = output_mode
 		? selected_output === $ResultStore.length - 1
 		: selected_input === inputs.length - 1;
 	$: input_str = inputs.join(' ');
 	$: input_is_full = inputs.length === max_instructions;
+
+	let selected_group = 1;
+	let time = '00.00';
 
 	function selectSafe(index: number): number {
 		if (index < 0) return 0;
@@ -261,7 +265,7 @@
 		} else {
 			const initial_instruction = inputs[selected_input];
 
-			if (last_selected_input) {
+			if (last_selected_instruction) {
 				inputs = inputs.slice(0, selected_input);
 			} else if (!end_selected) {
 				inputs = [...inputs.slice(0, selected_input + 1), ...inputs.slice(selected_input + 2)];
@@ -351,16 +355,28 @@
 <div class="flow-container">
 	<div class="text-container">
 		<div class="screen">
-			{#each output_mode ? $ResultStore : inputs as instruction, index}
-				<p class:selected-input={index === selected && prompt_period} class="screen-instruction">
-					{instruction}
+			<div class="header">
+				<p class="w-12">{output_mode ? 'output' : 'output'}</p>
+				<p>
+					<span class="w-[18px] text-end">{selected + Number(!end_selected)}</span>/<span
+						class="w-[18px] text-end">{instructions.length}</span
+					>
 				</p>
-			{/each}
-			{#if !output_mode && inputs.length < max_instructions}
-				<span class:selected-input={end_selected && prompt_period} class="input">&nbsp;</span>
-			{/if}
+				<p>G{selected_group}</p>
+				<p class="w-[52px] text-end">{time} s</p>
+			</div>
+			<div class="instructions">
+				{#each output_mode ? $ResultStore : inputs as instruction, index}
+					<p class:selected-input={index === selected && prompt_period} class="screen-instruction">
+						{instruction}
+					</p>
+				{/each}
+				{#if !output_mode && inputs.length < max_instructions}
+					<span class:selected-input={end_selected && prompt_period} class="input">&nbsp;</span>
+				{/if}
+			</div>
+			<RubikComponent show={rubik_mode} bind:input_rubik bind:output_rubik {output_mode} />
 		</div>
-		<RubikComponent show={rubik_mode} bind:input_rubik bind:output_rubik {output_mode} />
 		<div class="clipboard-container">
 			<button on:click={handleCopy}>copy</button>
 			{#if !output_mode}
@@ -432,7 +448,7 @@
 <!-- ========================= CSS -->
 <style lang="postcss">
 	.imprimed-title {
-		@apply absolute -top-[28px] left-2 ml-3 select-none;
+		@apply absolute -top-[28px] left-0 ml-3 select-none;
 		font-family: 'Chistoso';
 		font-size: 1.1em;
 	}
@@ -446,9 +462,23 @@
 	}
 
 	.screen {
-		@apply grid grid-cols-8 grid-rows-8 m-0 w-[240px] h-[240px] p-3 border-solid border-[1px] border-black rounded-md break-words duration-300;
+		@apply m-0 p-3 border-solid border-[1px] border-black rounded-md break-words duration-300;
+		font-family: 'Minecraftia';
 		box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.322);
 		background-color: #c9e9c5;
+	}
+
+	.header {
+		@apply m-0 px-[3px] flex justify-between text-sm;
+	}
+
+	.header > p,
+	.header > p > span {
+		@apply inline-block;
+	}
+
+	.instructions {
+		@apply grid grid-cols-8 grid-rows-7 m-0 pt-2 w-[240px] h-[200px];
 	}
 
 	.physic-button-container {
@@ -505,7 +535,6 @@
 
 	.screen-instruction {
 		@apply p-1 m-0 text-neutral-900 select-none;
-		font-family: 'Minecraftia';
 		font-size: 85%;
 		font-weight: 500;
 	}
@@ -516,7 +545,7 @@
 	}
 
 	.clipboard-container {
-		@apply absolute -top-[34px] right-3 opacity-0 duration-300 p-2 select-none;
+		@apply absolute -top-[34px] right-2 opacity-0 duration-300 p-2 select-none;
 	}
 
 	.clipboard-container:hover,

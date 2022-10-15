@@ -23,7 +23,7 @@
 	let HandleKeyDown = (e: any) => {};
 
 	onMount(async () => {
-		const engine = new Engine(266, 266, canvas);
+		const engine = new Engine(266, 250, canvas);
 
 		output_rubik = new Rubik(await generateCubes(), engine);
 		output_rubik.visible(false);
@@ -39,6 +39,6 @@
 <!-- ========================= CSS -->
 <style lang="postcss">
 	.rubik {
-		@apply absolute w-[266px] h-[266px] rounded-md duration-200;
+		@apply absolute top-3 left-0 w-[266px] h-[266px] rounded-md duration-200;
 	}
 </style>
