@@ -4,12 +4,16 @@
 	import ApiPostResolve from '../api/post.resolve';
 	import * as StaticInstructions from '../stores/static/instructions';
 	import SanitizeInput from '../sanitizers/input';
-	import Rubik from '../rubik/rubik.svelte';
+	import RubikComponent from '../rubik/rubik.svelte';
+	import type { Rubik } from '../rubik/rubik';
 
 	const screen_rows = 8;
 	const screen_columns = 8;
 	const max_instructions = screen_rows * screen_columns;
 	const max_selected_input = max_instructions - 1;
+
+	let input_rubik: Rubik | undefined = undefined;
+	let output_rubik: Rubik | undefined = undefined;
 
 	$: output_mode = $ResultStore.length > 0;
 	let rubik_mode = false;
@@ -17,19 +21,19 @@
 	let prompt_id = 0;
 	let prompt_period = false;
 	let inputs: string[] = [];
-	let input_selected = 0;
-	let output_selected = 0;
+	let selected_input = 0;
+	let selected_output = 0;
 
-	$: selected = output_mode ? output_selected : input_selected;
+	$: selected = output_mode ? selected_output : selected_input;
 
 	$: end_selected = output_mode
-		? output_selected === $ResultStore.length
-		: input_selected === inputs.length;
-	$: last_input_selected = output_mode
-		? output_selected === $ResultStore.length - 1
-		: input_selected === inputs.length - 1;
-	$: no_inputs = output_mode ? $ResultStore.length === 0 : inputs.length === 0;
+		? selected_output === $ResultStore.length
+		: selected_input === inputs.length;
+	$: last_selected_input = output_mode
+		? selected_output === $ResultStore.length - 1
+		: selected_input === inputs.length - 1;
 	$: input_str = inputs.join(' ');
+	$: input_is_full = inputs.length === max_instructions;
 
 	function selectSafe(index: number): number {
 		if (index < 0) return 0;
@@ -52,121 +56,226 @@
 		if (output_mode) {
 			// search
 		} else {
-			const input_selected_value = inputs[input_selected];
-			if (input_selected_value != undefined && input_selected_value[0] === instruction[0]) {
+			const selected_input_value = inputs[selected_input];
+			if (selected_input_value != undefined && selected_input_value[0] === instruction[0]) {
+				// If overwrite same instruction type
 				const base = instruction[0];
-				switch ((input_selected_value + instruction).replaceAll(base, 'X')) {
+
+				switch ((selected_input_value + instruction).replaceAll(base, 'X')) {
 					case 'XX':
 					case "X'X'":
-						inputs[input_selected] = base + '2';
+						inputs[selected_input] = base + '2';
+						input_rubik?.pushMove(instruction);
+						handleHorizontalMove(true, false);
 						break;
 					case 'X2X':
-						inputs[input_selected] = base + "'";
+						inputs[selected_input] = base + "'";
+						input_rubik?.pushMove(instruction);
+						handleHorizontalMove(true, false);
 						break;
 					case "X2X'":
+						inputs[selected_input] = base;
+						input_rubik?.pushMove(instruction);
+						handleHorizontalMove(true, false);
+						break;
 					case "X'X":
-						inputs[input_selected] = base;
+						input_rubik?.pushMove(instruction);
+						input_rubik?.pushMove(instruction);
+						inputs[selected_input] = base;
+						handleHorizontalMove(true, false);
 						break;
 					default:
-						inputs[input_selected] = instruction;
+						input_rubik?.pushMove(inputs[selected_input], true);
+						input_rubik?.pushMove(instruction);
+						inputs[selected_input] = instruction;
 						break;
 				}
-			} else if (!end_selected) {
-				inputs[input_selected] = instruction;
+
+				return;
+			}
+
+			if (!end_selected) {
+				// If overwrite an different instruction type
+				input_rubik?.pushMove(inputs[selected_input], true);
+				inputs[selected_input] = instruction;
 			} else if (inputs.length < max_instructions) {
+				// If write a new instruction
 				inputs = [...inputs, instruction];
 			}
-			handleHorizontalMove(true);
+
+			input_rubik?.pushMove(instruction);
+			handleHorizontalMove(true, false);
 		}
 	}
 
-	function handleHorizontalMove(direction: boolean) {
+	function handleHorizontalMove(direction: boolean, animation = true) {
 		new_prompte();
-		if (direction) {
-			// right
-			output_mode
-				? (output_selected = selectSafe(output_selected + 1))
-				: (input_selected = selectSafe(input_selected + 1));
-		} else {
-			// left
-			if (output_mode) {
-				output_selected = selectSafe(output_selected - 1);
+
+		if (output_mode) {
+			if (direction) {
+				// right
+				selected_output = selectSafe(selected_output + 1);
 			} else {
-				input_selected = selectSafe(input_selected - 1);
+				// left
+				selected_output = selectSafe(selected_output - 1);
+			}
+		} else {
+			const initial_selected_input = selected_input;
+
+			if (direction) {
+				// right
+				selected_input = selectSafe(selected_input + 1);
+			} else {
+				// left
+				selected_input = selectSafe(selected_input - 1);
+			}
+
+			if (selected_input != initial_selected_input) {
+				if (inputs[selected_input] != undefined && inputs[initial_selected_input] != undefined) {
+					if (selected_input < initial_selected_input) {
+						input_rubik?.pushMove(inputs[initial_selected_input], true);
+					} else {
+						input_rubik?.pushMove(inputs[selected_input], false);
+					}
+				}
 			}
 		}
 	}
 
-	function handleHorizontalSuperMove(direction: boolean) {
+	function handleHorizontalSuperMove(direction: boolean, zero = false) {
 		new_prompte();
-		if (direction) {
-			// end
-			if (output_mode) {
-				output_selected = selectSafe($ResultStore.length);
+
+		if (output_mode) {
+			if (direction) {
+				// right
+				selected_output = selectSafe($ResultStore.length);
 			} else {
-				input_selected = selectSafe(inputs.length);
+				// left
+				selected_output = selectSafe(0);
 			}
 		} else {
-			// start
-			if (output_mode) {
-				output_selected = selectSafe(0);
+			const initial_selected_input = selected_input;
+
+			if (direction) {
+				// right
+				selected_input = selectSafe(inputs.length);
 			} else {
-				input_selected = selectSafe(0);
+				// left
+				selected_input = selectSafe(0);
+			}
+
+			if (selected_input != initial_selected_input || zero) {
+				if (!direction || zero) {
+					// left
+					inputs
+						.slice(zero ? 0 : 1, initial_selected_input + 1)
+						.reverse()
+						.forEach((instruction) => input_rubik?.pushMove(instruction, true));
+				} else {
+					// right
+					inputs
+						.slice(initial_selected_input + 1)
+						.forEach((instruction) => input_rubik?.pushMove(instruction, false));
+				}
 			}
 		}
 	}
 
 	function handleVerticalMove(direction: boolean) {
 		new_prompte();
-		if (direction) {
-			// up
-			if (output_mode) {
-				if (output_selected >= screen_rows)
-					output_selected = selectSafe(output_selected - screen_rows);
+
+		if (output_mode) {
+			if (direction) {
+				// up
+				selected_output = selectSafe(selected_output - screen_rows);
 			} else {
-				if (input_selected >= screen_rows)
-					input_selected = selectSafe(input_selected - screen_rows);
+				// down
+				selected_output = selectSafe(selected_output + screen_rows);
 			}
 		} else {
-			// down
-			if (output_mode) {
-				if (output_selected < $ResultStore.length - screen_rows)
-					output_selected = selectSafe(output_selected + screen_rows);
+			const initial_selected_input = selected_input;
+			const initial_end_selected = end_selected;
+
+			if (direction) {
+				// up
+				selected_input = selectSafe(selected_input - screen_rows);
 			} else {
-				if (input_selected < inputs.length - screen_rows + 1)
-					input_selected = selectSafe(input_selected + screen_rows);
+				// down
+				selected_input = selectSafe(selected_input + screen_rows);
+			}
+
+			if (selected_input != initial_selected_input) {
+				if (direction) {
+					// up
+					inputs
+						.slice(selected_input + 1, initial_selected_input + (initial_end_selected ? 0 : 1))
+						.reverse()
+						.forEach((instruction) => input_rubik?.pushMove(instruction, true));
+				} else {
+					// down
+					inputs
+						.slice(initial_selected_input + 1, selected_input + 1)
+						.forEach((instruction) => input_rubik?.pushMove(instruction, false));
+				}
 			}
 		}
 	}
 
 	function handleReset() {
-		input_selected = selectSafe(0);
-		output_selected = selectSafe(0);
+		handleHorizontalSuperMove(false, true);
+		selected_input = selectSafe(0);
+		selected_output = selectSafe(0);
 		inputs = [];
 		ResultStore.reset();
 		new_prompte();
 	}
 
 	function handleInsert() {
-		inputs = [
-			...inputs.slice(0, input_selected),
-			StaticInstructions.instructions[0],
-			...inputs.slice(input_selected)
-		];
+		if (!output_mode) {
+			if (input_is_full) {
+				handleInstruction(StaticInstructions.physical_instructions[0]);
+			} else {
+				const initial_instruction = inputs[selected_input];
+
+				inputs = [
+					...inputs.slice(0, selected_input),
+					StaticInstructions.instructions[0],
+					...inputs.slice(selected_input)
+				];
+
+				const superseding_instruction = inputs[selected_input];
+
+				if (initial_instruction != superseding_instruction) {
+					if (initial_instruction != undefined) input_rubik?.pushMove(initial_instruction, true);
+					if (superseding_instruction != undefined)
+						input_rubik?.pushMove(superseding_instruction, false);
+				}
+			}
+		}
 	}
 
 	function handleDelete() {
 		if (output_mode) {
-			output_selected = 0;
+			selected_output = 0;
 			ResultStore.reset();
 		} else {
-			if (last_input_selected) {
-				inputs = inputs.slice(0, input_selected);
+			const initial_instruction = inputs[selected_input];
+
+			if (last_selected_input) {
+				inputs = inputs.slice(0, selected_input);
 			} else if (!end_selected) {
-				inputs = [...inputs.slice(0, input_selected + 1), ...inputs.slice(input_selected + 2)];
-			} else if (!no_inputs) {
-				inputs = inputs.slice(0, input_selected - 1);
-				handleHorizontalMove(false);
+				inputs = [...inputs.slice(0, selected_input + 1), ...inputs.slice(selected_input + 2)];
+			}
+
+			const superseding_instruction = inputs[selected_input];
+
+			if (initial_instruction != superseding_instruction) {
+				if (initial_instruction != undefined) {
+					input_rubik?.pushMove(initial_instruction, true);
+					if (superseding_instruction != undefined) {
+						input_rubik?.pushMove(superseding_instruction, false);
+					}
+				}
 			}
 		}
 	}
@@ -187,6 +296,8 @@
 
 	function handleRandom() {
 		if (!output_mode) {
+			handleHorizontalSuperMove(false, true);
+
 			function getRandomNumber(min: number, max: number): number {
 				return Math.floor(min + Math.random() * max);
 			}
@@ -201,6 +312,8 @@
 						getRandomNumber(0, StaticInstructions.instructions.length)
 					]
 				);
+
+			if (inputs.length > 0) input_rubik?.pushMove(inputs[0]);
 		}
 	}
 
@@ -237,7 +350,7 @@
 <!-- ========================= HTML -->
 <div class="flow-container">
 	<div class="text-container">
-		<div class="screen" style="opacity: {rubik_mode ? '0.1' : '1'};">
+		<div class="screen">
 			{#each output_mode ? $ResultStore : inputs as instruction, index}
 				<p class:selected-input={index === selected && prompt_period} class="screen-instruction">
 					{instruction}
@@ -247,7 +360,7 @@
 				<span class:selected-input={end_selected && prompt_period} class="input">&nbsp;</span>
 			{/if}
 		</div>
-		<Rubik show={rubik_mode} />
+		<RubikComponent show={rubik_mode} bind:input_rubik bind:output_rubik {output_mode} />
 		<div class="clipboard-container">
 			<button on:click={handleCopy}>copy</button>
 			{#if !output_mode}
@@ -263,70 +376,54 @@
 			><spane class="text-neutral-300">4</spane>
 		</p>
 		<div class="physic-button-container">
-			<button
-				class="physic-button left-rotation special-instruction text-red-400"
-				on:click={handleReset}>rst</button
-			>
-			<button
-				class="physic-button left-rotation special-instruction text-red-400"
-				on:click={handleDelete}>del</button
-			>
-			<button class="physic-button left-rotation special-instruction" on:click={handleInsert}
-				>ins</button
-			>
-			<button class="physic-button right-rotation special-instruction">grp</button>
-			<button class="physic-button right-rotation special-instruction" on:click={handleRandom}
-				>ran</button
-			>
-			<button class="physic-button right-rotation special-instruction">on</button>
+			<button class="physic-button left-rotation text-red-400" on:click={handleReset}>rst</button>
+			<button class="physic-button left-rotation text-red-400" on:click={handleDelete}>del</button>
+			<button class="physic-button left-rotation" on:click={handleInsert}>ins</button>
+			<button class="physic-button right-rotation">grp</button>
+			<button class="physic-button right-rotation" on:click={handleRandom}>ran</button>
+			<button class="physic-button right-rotation">on</button>
 			{#each StaticInstructions.physical_instructions as instruction, index}
 				<button
-					class="physic-button {index % 6 >= 3 ? 'right-rotation' : 'left-rotation'}"
+					class="physic-button instruction-button {index % 6 >= 3
+						? 'right-rotation'
+						: 'left-rotation'}"
 					on:click={() => handleInstruction(instruction)}>{instruction.toLocaleLowerCase()}</button
 				>
 			{/each}
 			<button
-				class="physic-button left-rotation special-instruction"
+				class="physic-button left-rotation move-button"
 				on:click={() => handleVerticalMove(false)}>{'v'}</button
 			>
 			<button
-				class="physic-button left-rotation special-instruction"
+				class="physic-button left-rotation move-button"
 				on:click={() => handleHorizontalSuperMove(false)}>{'<<'}</button
 			>
 			<button
-				class="physic-button left-rotation special-instruction"
+				class="physic-button left-rotation move-button"
 				on:click={() => handleHorizontalMove(false)}>{'<'}</button
 			>
 			<button
-				class="physic-button right-rotation special-instruction"
+				class="physic-button right-rotation move-button"
 				on:click={() => handleHorizontalMove(true)}>{'>'}</button
 			>
 			<button
-				class="physic-button right-rotation special-instruction"
+				class="physic-button right-rotation move-button"
 				on:click={() => handleHorizontalSuperMove(true)}>{'>>'}</button
 			>
 			<button
-				class="physic-button right-rotation special-instruction"
+				class="physic-button right-rotation move-button"
 				style="rotate: 180deg;"
 				on:click={() => handleVerticalMove(true)}>{'v'}</button
 			>
-			<button class="physic-button left-rotation special-instruction" style="rotate: 180deg;"
-				>...</button
+			<button class="physic-button left-rotation bottom-button">itr</button>
+			<button class="physic-button left-rotation bottom-button">an</button>
+			<button class="physic-button left-rotation move-button">{'<~'}</button>
+			<button class="physic-button right-rotation move-button">{'~>'}</button>
+			<button class="physic-button right-rotation bottom-button" on:click={handleDimension}
+				>rbk</button
 			>
-			<button class="physic-button left-rotation special-instruction" style="rotate: 180deg;"
-				>...</button
-			>
-			<button class="physic-button left-rotation special-instruction" style="rotate: 180deg;"
-				>...</button
-			>
-			<button class="physic-button right-rotation special-instruction" style="rotate: 180deg;"
-				>...</button
-			>
-			<button class="physic-button right-rotation special-instruction" on:click={handleDimension}
-				>dim</button
-			>
-			<button class="physic-button right-rotation special-instruction" on:click={handleResolve}
-				>ok</button
+			<button class="physic-button right-rotation bottom-button" on:click={handleResolve}
+				>rsl</button
 			>
 		</div>
 	</div>
@@ -371,21 +468,30 @@
 	}
 
 	.physic-button {
-		@apply border-none px-[7px] py-[8px] hover:cursor-pointer;
+		@apply border-none px-[7px] py-[8px];
 		font-weight: 500;
-		background-color: azure;
+		background-color: #eee;
 	}
 
 	.physic-button:hover {
 		filter: brightness(92%);
+		cursor: pointer;
 	}
 
 	.physic-button:hover:active {
 		filter: brightness(80%);
 	}
 
-	.special-instruction {
-		background-color: #eee;
+	.instruction-button {
+		background-color: azure;
+	}
+
+	.move-button {
+		background-color: snow;
+	}
+
+	.bottom-button {
+		background-color: rgb(255, 251, 235); /* cornsilk; */
 	}
 
 	.physic-button.right-rotation {
