@@ -2,6 +2,7 @@ version: "3.8"
 services:
   api:
     build:
+      # dev
       context: ./
       dockerfile: ./api/Dockerfile
     env_file:
@@ -14,6 +15,7 @@ services:
 
   client:
     build:
+      # dev
       context: ./
       dockerfile: ./client/Dockerfile
     env_file:

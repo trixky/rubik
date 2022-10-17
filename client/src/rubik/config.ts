@@ -1,6 +1,10 @@
 export default {
 	moves: {
-		duration: 0.2
+		durations: {
+			slow: 0.3,
+			fast: 0.1,
+			nitro: 0.05,
+		}
 	},
 	camera: {
 		distance: 14

@@ -6,6 +6,7 @@
 	import SanitizeInput from '../sanitizers/input';
 	import RubikComponent from '../rubik/rubik.svelte';
 	import type { Rubik } from '../rubik/rubik';
+	import RubikConfig from '../rubik/config'
 
 	const screen_rows = 7;
 	const screen_columns = 8;
@@ -146,7 +147,7 @@
 		}
 	}
 
-	function handleHorizontalSuperMove(direction: boolean, zero = false) {
+	function handleHorizontalSuperMove(direction: boolean, zero = false, duration = RubikConfig.moves.durations.nitro) {
 		new_prompte();
 
 		if (output_mode) {
@@ -174,18 +175,18 @@
 					inputs
 						.slice(zero ? 0 : 1, initial_selected_input + 1)
 						.reverse()
-						.forEach((instruction) => input_rubik?.pushMove(instruction, true));
+						.forEach((instruction) => input_rubik?.pushMove(instruction, true, duration));
 				} else {
 					// right
 					inputs
 						.slice(initial_selected_input + 1)
-						.forEach((instruction) => input_rubik?.pushMove(instruction, false));
+						.forEach((instruction) => input_rubik?.pushMove(instruction, false, duration));
 				}
 			}
 		}
 	}
 
-	function handleVerticalMove(direction: boolean) {
+	function handleVerticalMove(direction: boolean, duration = RubikConfig.moves.durations.fast) {
 		new_prompte();
 
 		if (output_mode) {
@@ -214,19 +215,19 @@
 					inputs
 						.slice(selected_input + 1, initial_selected_input + (initial_end_selected ? 0 : 1))
 						.reverse()
-						.forEach((instruction) => input_rubik?.pushMove(instruction, true));
+						.forEach((instruction) => input_rubik?.pushMove(instruction, true, duration));
 				} else {
 					// down
 					inputs
 						.slice(initial_selected_input + 1, selected_input + 1)
-						.forEach((instruction) => input_rubik?.pushMove(instruction, false));
+						.forEach((instruction) => input_rubik?.pushMove(instruction, false, duration));
 				}
 			}
 		}
 	}
 
 	function handleReset() {
-		handleHorizontalSuperMove(false, true);
+		handleHorizontalSuperMove(false, true, RubikConfig.moves.durations.nitro);
 		selected_input = selectSafe(0);
 		selected_output = selectSafe(0);
 		inputs = [];
@@ -268,7 +269,7 @@
 			if (last_selected_instruction) {
 				inputs = inputs.slice(0, selected_input);
 			} else if (!end_selected) {
-				inputs = [...inputs.slice(0, selected_input + 1), ...inputs.slice(selected_input + 2)];
+				inputs = [...inputs.slice(0, selected_input), ...inputs.slice(selected_input + 1)];
 			}
 
 			const superseding_instruction = inputs[selected_input];
@@ -392,8 +393,8 @@
 			><spane class="text-neutral-300">4</spane>
 		</p>
 		<div class="physic-button-container">
-			<button class="physic-button left-rotation text-red-400" on:click={handleReset}>rst</button>
-			<button class="physic-button left-rotation text-red-400" on:click={handleDelete}>del</button>
+			<button class="physic-button left-rotation red-button" on:click={handleReset}>rst</button>
+			<button class="physic-button left-rotation red-button" on:click={handleDelete}>del</button>
 			<button class="physic-button left-rotation" on:click={handleInsert}>ins</button>
 			<button class="physic-button right-rotation">grp</button>
 			<button class="physic-button right-rotation" on:click={handleRandom}>ran</button>
@@ -531,6 +532,10 @@
 	.physic-button.left-rotation {
 		@apply ml-[2px];
 		margin-right: 2px;
+	}
+
+	.red-button {
+		@apply text-red-400;
 	}
 
 	.screen-instruction {

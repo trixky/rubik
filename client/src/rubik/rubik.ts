@@ -26,31 +26,31 @@ export class Rubik {
 		this.moving = false;
 	}
 
-	pushMove(instruction: string, reverse = false) {
+	pushMove(instruction: string, reverse = false, duration = Config.moves.durations.slow) {
 		if (instruction.length === 2) {
 			const basic_instruction = instruction[0];
 
 			if (instruction[1] === '2') {
-				this.pushMove(basic_instruction, reverse);
-				this.pushMove(basic_instruction, reverse);
+				this.pushMove(basic_instruction, reverse, duration);
+				this.pushMove(basic_instruction, reverse, duration);
 			} else {
-				this.pushMove(basic_instruction, !reverse);
+				this.pushMove(basic_instruction, !reverse, duration);
 			}
 		} else {
 			(() => {
 				switch (instruction) {
 					case 'F':
-						return this.moves.push(new Move('x', -1, !reverse));
+						return this.moves.push(new Move('x', -1, !reverse, duration));
 					case 'R':
-						return this.moves.push(new Move('z', 1, reverse));
+						return this.moves.push(new Move('z', 1, reverse, duration));
 					case 'U':
-						return this.moves.push(new Move('y', 1, reverse));
+						return this.moves.push(new Move('y', 1, reverse, duration));
 					case 'B':
-						return this.moves.push(new Move('x', 1, reverse));
+						return this.moves.push(new Move('x', 1, reverse, duration));
 					case 'L':
-						return this.moves.push(new Move('z', -1, !reverse));
+						return this.moves.push(new Move('z', -1, !reverse, duration));
 					case 'D':
-						return this.moves.push(new Move('y', -1, !reverse));
+						return this.moves.push(new Move('y', -1, !reverse, duration));
 				}
 			}).bind(this)();
 
@@ -77,7 +77,7 @@ export class Rubik {
 				});
 
 				await gsap.to(this.pivot.rotation, {
-					duration: Config.moves.duration,
+					duration: move.duration,
 					[move.axe]: move.reverse ? quarterTurn : -quarterTurn
 				});
 
