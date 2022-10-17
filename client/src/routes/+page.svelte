@@ -270,6 +270,8 @@
 				inputs = inputs.slice(0, selected_input);
 			} else if (!end_selected) {
 				inputs = [...inputs.slice(0, selected_input), ...inputs.slice(selected_input + 1)];
+			} else {
+				handleHorizontalMove(false)
 			}
 
 			const superseding_instruction = inputs[selected_input];
