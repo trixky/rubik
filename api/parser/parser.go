@@ -3,10 +3,10 @@ package parser
 import (
 	"os"
 	"fmt"
-    "time"
+	"time"
 	"strings"
     "math/rand"
-
+	"github.com/trixky/rubik/models"
 )
 
 // prints help and exits
@@ -66,9 +66,9 @@ func isValidShuffle(words []string) (bool, string) {
 		verbose, random: boolean depicting those options
 		api_mode: false if no api, yes if it has to start
 */
-func ReadArgs() (verbose bool, random bool, sequence []string) {
+func ReadArgs() (verbose bool, random bool, correction bool, sequence []string) {
 	sequence_exists := false
-	verbose, random = false, false
+	verbose, random, correction = false, false, false
 	sequence = []string{}
 
 	args := os.Args[1:]
@@ -79,7 +79,9 @@ func ReadArgs() (verbose bool, random bool, sequence []string) {
 			verbose = true
 		} else if arg == "-r" || arg == "--random" {
 			random = true
-		} else {
+		} else if arg == "-c" || arg == "--correction" {
+			correction = true
+		}else {
 			if (string(arg[0]) == "-") {
 				wrongInputUsage("option: " + arg + " is not an option")
 			}
@@ -105,32 +107,19 @@ func ReadArgs() (verbose bool, random bool, sequence []string) {
 }
 
 // returns a random sequence, overrides the one given in argument
-func RandomSequence() (sequence []string) {
-	faces := []string{
-		"U",
-		"F",
-		"R",
-		"B",
-		"L",
-		"D",
+func RandomSequence(min int, length int) []string {
+	if min > 0 && length < min {
+		length = min
 	}
-	options := []string{
-		"",
-		"'",
-		"2",
-	}
-
 
 	source := rand.NewSource(time.Now().UnixNano())
-    randGen := rand.New(source)
+	randGen := rand.New(source)
 
-	length := randGen.Intn(60)
-	fmt.Printf("Random sequence activated: length of %d\n", length)
+	sequence := []string{}
 
-	sequence = []string {}
+	moves := models.GetGroupMoves(0, models.Cube{})
 	for i := 0; i < length; i++ {
-		sequence = append(sequence, faces[randGen.Intn(6)] + options[randGen.Intn(3)],)
+		sequence = append(sequence, moves[randGen.Intn(len(moves))],)
 	}
-	fmt.Println("Random sequence is ", sequence)
-	return
+	return sequence
 }

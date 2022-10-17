@@ -63,8 +63,8 @@ func whichGroup(cube *Cube) int {
 			return 1
 		}
 	}
-	for i := 8; i < 12; i++ { // edges 8 to 11 are middle one (fr, fl, br, bl)
-		if cube.edgePos[i] < uint8(8) { // check that they are in the middle
+	for i := 8; i < 12; i++ { // slice L R are in their slice
+		if cube.edgePos[i] < uint8(8) { // check that the ufbd slice is correct
 			return 1
 		}
 	}
@@ -85,16 +85,18 @@ func whichGroup(cube *Cube) int {
 			return 2
 		}
 	}
-	for i := 0; i < 4; i++ { // edge correct face
+
+	for i := 0; i < 4; i++ { // edge fb correct
 		if cube.edgePos[i] > uint8(3) {
 			return 2
 		}
 	}
-	for i := 4; i < 8; i++ { // edge correct face
+	for i := 4; i < 8; i++ { // edge ud correct
 		if cube.edgePos[i] < uint8(4) || cube.edgePos[i] > uint8(7) {
 			return 2
 		}
 	}
+
 	var parity int
 	for i := range cube.cornerPos {
 		if cube.cornerPos[i] != uint8(i) {
@@ -118,22 +120,16 @@ func whichGroup(cube *Cube) int {
 
 
 /*
-** getGroupMoves returns coset moves to get to the next group
+** GetGroupMoves returns coset moves to get to the next group
 ** argument:
 ** @group uint8: the current group number
 ** @c Cube: cube from which we get two last moves not to do them
 ** returns a array of string: the coset moves to advance to next group
 */
-func getGroupMoves(group int, c Cube) []string { // not sure if need all moves or only elementary
+func GetGroupMoves(group int, c Cube) []string { // not sure if need all moves or only elementary
 	moves := []string{}
 	if group == 0 {
 		moves = []string{
-			"U",
-			"U'",
-			"U2",
-			"D",
-			"D'",
-			"D2",
 			"L",
 			"L'",
 			"L2",
@@ -146,15 +142,32 @@ func getGroupMoves(group int, c Cube) []string { // not sure if need all moves o
 			"B",
 			"B'",
 			"B2",
-		}
-	} else if group == 1 {
-		moves = []string{
 			"U",
 			"U'",
 			"U2",
 			"D",
 			"D'",
 			"D2",
+		}
+	} else if group == 1 {
+		moves = []string{
+			"L",
+			"L'",
+			"L2",
+			"R",
+			"R'",
+			"R2",
+			"F",
+			"F'",
+			"F2",
+			"B",
+			"B'",
+			"B2",
+			"U2",
+			"D2",
+		}
+	} else if group == 2 {
+		moves = []string{
 			"L",
 			"L'",
 			"L2",
@@ -163,32 +176,20 @@ func getGroupMoves(group int, c Cube) []string { // not sure if need all moves o
 			"R2",
 			"F2",
 			"B2",
-		}
-	} else if group == 2 {
-		moves = []string{
-			"U",
-			"U'",
 			"U2",
-			"D",
-			"D'",
 			"D2",
-			"L2",
-			"R2",
-			"F2",
-			"B2",
 		}
 	} else if group == 3 {
 		moves = []string{
-			"U2",
-			"D2",
 			"L2",
 			"R2",
 			"F2",
 			"B2",
+			"U2",
+			"D2",
 		}
 	}
 	if c.move != "" {
-
 		var fewer_moves []string
 		for _, move := range moves {
 			if c.move[0] != move[0] {

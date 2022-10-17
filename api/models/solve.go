@@ -15,26 +15,24 @@ func isInPath(succ *Cube, path []Cube) bool {
 	return false
 }
 
-func heuristic(node Cube, group int, tables *tables) int {
+func heuristic(node *Cube, group int, tables *tables) int {
 	if group == 0 {
 		return int(tables.Table0[edgeOriToInt(node.edgeOri)])
 	} else if group == 1 {
-		return int(tables.Table1[cornerOriToInt(node.cornerOri)][edgePosToInt(node.edgeOri)])
+		return int(tables.Table1[tables.T1EdgePosIndex[edgePosToInt(node.edgePos)]][cornerOriToInt(node.cornerOri)])
+	} else if group == 2 {
+		return int(tables.Table2[cPosToInt(node.cornerPos)][tables.T2EdgePosIndex[edgePosToIntT2(node.edgePos)]])
+	} else {
+		ePos := edgePosConverter(node.edgePos)
+		return int(tables.Table3[tables.T3cornerPosIndex[cPosToInt(node.cornerPos)]][ePos[0]][ePos[1]][ePos[2]])
 	}
-	return int(tables.Table1[cornerOriToInt(node.cornerOri)][edgePosToInt(node.edgeOri)])
-
-	// } else if group == 2 {
-		
-	// } else if group == 3 {
-		
-	// }
 }
 
 func search(path []Cube, g int, bound int, group int, tables *tables) (int, string) {
 	node := path[len(path) - 1]
-	h := heuristic(node, group, tables)
+	h := heuristic(&node, group, tables)
 	f := g + h
-	
+
 	if f > bound {
 		return f, ""
 	}
@@ -47,13 +45,12 @@ func search(path []Cube, g int, bound int, group int, tables *tables) (int, stri
 	}
 
 	min := 255
-	moves := getGroupMoves(group, node)
+	moves := GetGroupMoves(group, node)
 	for _, move := range moves {
-		fmt.Println(move)
 		succ := copyAndMove(&node, move)
 		if isInPath(succ, path) == false {
 			path = append(path, *succ)
-			cost, solvedGroup := search(path, g + heuristic(*succ, group, tables), bound, group, tables)
+			cost, solvedGroup := search(path, g + heuristic(succ, group, tables), bound, group, tables)
 			if cost == 255 {
 				return 255, solvedGroup
 			}
@@ -68,7 +65,7 @@ func search(path []Cube, g int, bound int, group int, tables *tables) (int, stri
 
 func idaStar(node *Cube, group int, tables *tables) []string {
 	path := []Cube{*node}
-	bound := heuristic(*node, group, tables)
+	bound := heuristic(node, group, tables)
 	for {
 		cost, solvedGroup := search(path, 0, bound, group, tables)
 		if cost == 255 {
@@ -81,23 +78,39 @@ func idaStar(node *Cube, group int, tables *tables) []string {
 func SolveSequence(verbose bool, sequence []string) []string {
 	tables := &tables{}
 	tables.setTables()
+
 	node := makeCubeFromSequence(sequence)
-	fmt.Println("group of beg node : ", whichGroup(node))
+
+	if verbose {
+		fmt.Println("This is the cube after doing your sequence :")
+		node.Print(-1)
+		fmt.Println("It it part of group", whichGroup(node))
+		fmt.Println("Time to solve :)")
+		fmt.Println()
+	}
+
 	var totalSequenceSolve []string
-	for group := whichGroup(node); group < 2; group++ {
+	for group := whichGroup(node); group < 4; group++ {
 		node.move = ""
-		start := time.Now()
 		
+		start := time.Now()
 		groupSequence := idaStar(node, group, tables)
 		
 		node.rotateSequence(groupSequence)
 		
-		fmt.Println("\ngroup : ", group)
-		fmt.Println("solve sequence : ", groupSequence)
-		fmt.Println("time : ", time.Since(start))
-		fmt.Println()
-
 		totalSequenceSolve = append(totalSequenceSolve, groupSequence...)
+
+		if verbose {
+			fmt.Println("Going from group", group, "to", group + 1)
+			node.Print(group)
+			fmt.Println("solve sequence : ", groupSequence)
+			fmt.Println("length : ", len(groupSequence))
+			fmt.Println("time : ", time.Since(start))
+			fmt.Println()
+		}
 	}
+	if isSolved(node) == false {
+		fmt.Println("NOT SOLVED ???")
+	} 
 	return totalSequenceSolve
 }

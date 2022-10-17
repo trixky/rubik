@@ -1,11 +1,12 @@
 package server
 
 import (
-	"io/ioutil"
 	"fmt"
+	"log"
+	"time"
 	"strings"
 	"net/http"
-	"log"
+	"io/ioutil"
 
 	"github.com/trixky/rubik/models"
 )
@@ -23,11 +24,13 @@ func resolve(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err)
 	}
 	sequence := strings.Fields(string(body))
+	start := time.Now()
 	result := models.SolveSequence(false, sequence)
-
-	var str string
+	duration := time.Since(start)
+	strToFront := fmt.Sprint(duration.Milliseconds()) + " "
 	for _, s := range result {
-		str += s
+		strToFront += s + " "
 	}
-	fmt.Fprintf(w, str)
+	
+	fmt.Fprintf(w, strToFront)
 }

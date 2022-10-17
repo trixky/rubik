@@ -41,7 +41,7 @@ func cornerOriToInt(cornerOri [8]byte) int {
 
 
 func createTable1(tables *tables) {
-	fmt.Println("Generating pruning table for G1")
+	fmt.Println("Generating pruning table for phase 1")
 
 	cube := &Cube{}
 	cube.initialize()
@@ -49,13 +49,13 @@ func createTable1(tables *tables) {
 		*cube,
 	}
 
-	depth := 0
-	for depth < 8 {
+	
+	for depth := 1; depth < 9; depth++ {
 		var children []Cube
-		depth++
+		
 		fmt.Println("table1: depth =", depth)
 		for _, parent := range parents {
-			for _, move := range getGroupMoves(1, parent) {
+			for _, move := range GetGroupMoves(1, parent) {
 				child := copyAndMove(&parent, move)
 				indexEdgePos := tables.T1EdgePosIndex[edgePosToInt(child.edgePos)]
 				indexCornerOri := cornerOriToInt(child.cornerOri)
@@ -69,7 +69,7 @@ func createTable1(tables *tables) {
 	}
 	for i := 0; i < 495; i++ {
 		for j := 0; j < 2187; j++ {
-			if (i > 0 && j > 0 && tables.Table1[i][j] == 0) {
+			if ((i > 0 || j > 0) && tables.Table1[i][j] == 0) {
 				tables.Table1[i][j] = 9
 			}
 		}
@@ -112,8 +112,6 @@ func setT1EdgePosConv(tables *tables) {
 func setTable1(tables *tables) {
 	setT1EdgePosConv(tables)
 	
-	fmt.Println("Getting table for phase 1 (G1 -> G2)")
-
 	if _, err := os.Stat("pruningTables"); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir("pruningTables", os.ModePerm)
 		if err != nil {
@@ -122,8 +120,6 @@ func setTable1(tables *tables) {
 	}
 
 	if _, err := os.Stat("pruningTables/Table1"); os.IsNotExist(err) {
-		fmt.Println("Creating table for phase 1")
-
 		start := time.Now()
 		createTable1(tables)
 		fmt.Println("Took ", time.Since(start))
@@ -145,7 +141,6 @@ func setTable1(tables *tables) {
 			}
 		}
 	} else {
-		fmt.Println("Reading and setting phase 1 map")
 		content, err := os.ReadFile("pruningTables/Table1")
 		if err != nil {
 			fmt.Println("failed to read pruning table file")

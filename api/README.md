@@ -26,3 +26,5 @@ For cube's group identities :<br>
 https://www.jaapsch.net/puzzles/thistle.htm<br>
 https://forum.francocube.com/viewtopic.php?t=5952<br>
 fig.3 is cool https://arxiv.org/pdf/1601.05744.pdf<br>
+http://www.diva-portal.org/smash/get/diva2:816583/FULLTEXT01.pdf<br>
+https://puzzling.stackexchange.com/questions/5402/what-is-the-meaning-of-a-tetrad-twist-in-thistlethwaites-algorithm<br>
