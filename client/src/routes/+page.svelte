@@ -192,10 +192,10 @@
 		if (output_mode) {
 			if (direction) {
 				// up
-				selected_output = selectSafe(selected_output - screen_rows);
+				selected_output = selectSafe(selected_output - screen_columns);
 			} else {
 				// down
-				selected_output = selectSafe(selected_output + screen_rows);
+				selected_output = selectSafe(selected_output + screen_columns);
 			}
 		} else {
 			const initial_selected_input = selected_input;
@@ -203,10 +203,10 @@
 
 			if (direction) {
 				// up
-				selected_input = selectSafe(selected_input - screen_rows);
+				selected_input = selectSafe(selected_input - screen_columns);
 			} else {
 				// down
-				selected_input = selectSafe(selected_input + screen_rows);
+				selected_input = selectSafe(selected_input + screen_columns);
 			}
 
 			if (selected_input != initial_selected_input) {
