@@ -31,11 +31,15 @@
 </script>
 
 <!-- ========================= HTML -->
-<canvas bind:this={canvas} class="rubik" style="opacity: {show ? '1' : '0'};" />
+<canvas bind:this={canvas} class="rubik" class:show={show} />
 
 <!-- ========================= CSS -->
 <style lang="postcss">
 	.rubik {
-		@apply absolute top-3 left-0 w-[266px] h-[266px] rounded-md duration-200;
+		@apply absolute top-3 left-0 w-[266px] h-[266px] rounded-md duration-300 opacity-0;
+	}
+
+	.rubik.show {
+		@apply hover:cursor-pointer opacity-100
 	}
 </style>

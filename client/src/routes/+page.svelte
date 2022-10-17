@@ -404,35 +404,36 @@
 <!-- ========================= HTML -->
 <div class="flow-container">
 	<div class="text-container">
-		<div class="screen">
-			<div class="header">
-				<p class="w-12">{output_mode ? 'output' : 'output'}</p>
-				<p>
-					<span class="w-[18px] text-end">{selected + Number(!end_selected)}</span>/<span
+		<div class="display">
+			<div class="screen" style="opacity: {rubik_mode ? 0.1 : 1};">
+				<div class="header" style="opacity: {rubik_mode ? 0.1 : 1};">
+					<p class="w-12">{output_mode ? 'output' : 'output'}</p>
+					<p>
+						<span class="w-[18px] text-end">{selected + Number(!end_selected)}</span>/<span
 						class="w-[18px] text-end">{instructions.length}</span
-					>
-				</p>
-				<p>G{selected_group}</p>
-				<p class="w-[52px] text-end">{time} s</p>
-			</div>
-			<div class="instructions">
-				{#each output_mode ? $ResultStore : inputs as instruction, index}
-					<p class:selected-input={index === selected && prompt_period} class="screen-instruction">
-						{instruction}
-					</p>
-				{/each}
-				{#if !output_mode && inputs.length < max_instructions}
-					<span class:selected-input={end_selected && prompt_period} class="input">&nbsp;</span>
-				{/if}
+					></p>
+					<p>G{selected_group}</p>
+					<p class="w-[52px] text-end">{time} s</p>
+				</div>
+				<div class="instructions" style="opacity: {rubik_mode ? 0.1 : 1};">
+					{#each output_mode ? $ResultStore : inputs as instruction, index}
+						<p class:selected-input={index === selected && prompt_period} class="screen-instruction">
+							{instruction}
+						</p>
+					{/each}
+					{#if !output_mode && inputs.length < max_instructions}
+						<span class:selected-input={end_selected && prompt_period} class="input">&nbsp;</span>
+					{/if}
+				</div>
 			</div>
 			<RubikComponent show={rubik_mode} bind:input_rubik bind:output_rubik {output_mode} />
 		</div>
 		<div class="clipboard-container">
-			<button on:click={handleCopy}>copy</button>
-			{#if !output_mode}
-				|
-				<button on:click={handlePaste}>paste</button>
-			{/if}
+		<button on:click={handleCopy}>copy</button>
+		{#if !output_mode}
+			|
+			<button on:click={handlePaste}>paste</button>
+		{/if}
 		</div>
 		<p class="imprimed-title">
 			<spane class="text-red-300">R</spane><spane class="text-green-300">u</spane><spane
@@ -605,7 +606,7 @@
 	}
 
 	.clipboard-container:hover,
-	.screen:hover + .clipboard-container {
+	.display:hover + .clipboard-container {
 		@apply opacity-[15%];
 	}
 
