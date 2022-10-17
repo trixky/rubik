@@ -6,7 +6,7 @@
 	import SanitizeInput from '../sanitizers/input';
 	import RubikComponent from '../rubik/rubik.svelte';
 	import type { Rubik } from '../rubik/rubik';
-	import RubikConfig from '../rubik/config'
+	import RubikConfig from '../rubik/config';
 
 	const screen_rows = 7;
 	const screen_columns = 8;
@@ -25,15 +25,19 @@
 	let selected_input = 0;
 	let selected_output = 0;
 
+	let instruction_id = 0;
+	let last_play_instruction_id = instruction_id;
+
 	$: selected = output_mode ? selected_output : selected_input;
 	$: instructions = output_mode ? $ResultStore : inputs;
 
-	$: end_selected = output_mode
+	$: end_selected_instruction = output_mode
 		? selected_output === $ResultStore.length
 		: selected_input === inputs.length;
 	$: last_selected_instruction = output_mode
 		? selected_output === $ResultStore.length - 1
 		: selected_input === inputs.length - 1;
+	$: first_selected_instruction = output_mode ? selected_output === 0 : selected_input === 0;
 	$: input_str = inputs.join(' ');
 	$: input_is_full = inputs.length === max_instructions;
 
@@ -52,12 +56,14 @@
 	}
 
 	function handleResolve() {
+		instruction_id++;
 		ApiPostResolve(input_str).then((result) => {
 			ResultStore.setFromString(result);
 		});
 	}
 
 	function handleInstruction(instruction: string) {
+		instruction_id++;
 		if (output_mode) {
 			// search
 		} else {
@@ -71,23 +77,23 @@
 					case "X'X'":
 						inputs[selected_input] = base + '2';
 						input_rubik?.pushMove(instruction);
-						handleHorizontalMove(true, false);
+						handleHorizontalMove(true);
 						break;
 					case 'X2X':
 						inputs[selected_input] = base + "'";
 						input_rubik?.pushMove(instruction);
-						handleHorizontalMove(true, false);
+						handleHorizontalMove(true);
 						break;
 					case "X2X'":
 						inputs[selected_input] = base;
 						input_rubik?.pushMove(instruction);
-						handleHorizontalMove(true, false);
+						handleHorizontalMove(true);
 						break;
 					case "X'X":
 						input_rubik?.pushMove(instruction);
 						input_rubik?.pushMove(instruction);
 						inputs[selected_input] = base;
-						handleHorizontalMove(true, false);
+						handleHorizontalMove(true);
 						break;
 					default:
 						input_rubik?.pushMove(inputs[selected_input], true);
@@ -99,7 +105,7 @@
 				return;
 			}
 
-			if (!end_selected) {
+			if (!end_selected_instruction) {
 				// If overwrite an different instruction type
 				input_rubik?.pushMove(inputs[selected_input], true);
 				inputs[selected_input] = instruction;
@@ -109,11 +115,12 @@
 			}
 
 			input_rubik?.pushMove(instruction);
-			handleHorizontalMove(true, false);
+			handleHorizontalMove(true);
 		}
 	}
 
-	function handleHorizontalMove(direction: boolean, animation = true) {
+	function handleHorizontalMove(direction: boolean, new_instruction = true) {
+		if (new_instruction) instruction_id++;
 		new_prompte();
 
 		if (output_mode) {
@@ -147,7 +154,12 @@
 		}
 	}
 
-	function handleHorizontalSuperMove(direction: boolean, zero = false, duration = RubikConfig.moves.durations.nitro) {
+	function handleHorizontalSuperMove(
+		direction: boolean,
+		zero = false,
+		duration = RubikConfig.moves.durations.nitro
+	) {
+		instruction_id++;
 		new_prompte();
 
 		if (output_mode) {
@@ -187,6 +199,7 @@
 	}
 
 	function handleVerticalMove(direction: boolean, duration = RubikConfig.moves.durations.fast) {
+		instruction_id++;
 		new_prompte();
 
 		if (output_mode) {
@@ -199,7 +212,7 @@
 			}
 		} else {
 			const initial_selected_input = selected_input;
-			const initial_end_selected = end_selected;
+			const initial_end_selected_instruction = end_selected_instruction;
 
 			if (direction) {
 				// up
@@ -213,7 +226,10 @@
 				if (direction) {
 					// up
 					inputs
-						.slice(selected_input + 1, initial_selected_input + (initial_end_selected ? 0 : 1))
+						.slice(
+							selected_input + 1,
+							initial_selected_input + (initial_end_selected_instruction ? 0 : 1)
+						)
 						.reverse()
 						.forEach((instruction) => input_rubik?.pushMove(instruction, true, duration));
 				} else {
@@ -227,6 +243,7 @@
 	}
 
 	function handleReset() {
+		instruction_id++;
 		handleHorizontalSuperMove(false, true, RubikConfig.moves.durations.nitro);
 		selected_input = selectSafe(0);
 		selected_output = selectSafe(0);
@@ -236,6 +253,7 @@
 	}
 
 	function handleInsert() {
+		instruction_id++;
 		if (!output_mode) {
 			if (input_is_full) {
 				handleInstruction(StaticInstructions.physical_instructions[0]);
@@ -260,6 +278,8 @@
 	}
 
 	function handleDelete() {
+		instruction_id++;
+
 		if (output_mode) {
 			selected_output = 0;
 			ResultStore.reset();
@@ -268,10 +288,10 @@
 
 			if (last_selected_instruction) {
 				inputs = inputs.slice(0, selected_input);
-			} else if (!end_selected) {
+			} else if (!end_selected_instruction) {
 				inputs = [...inputs.slice(0, selected_input), ...inputs.slice(selected_input + 1)];
 			} else {
-				handleHorizontalMove(false)
+				handleHorizontalMove(false);
 			}
 
 			const superseding_instruction = inputs[selected_input];
@@ -302,6 +322,8 @@
 	}
 
 	function handleRandom() {
+		instruction_id++;
+
 		if (!output_mode) {
 			handleHorizontalSuperMove(false, true);
 
@@ -345,6 +367,29 @@
 		}
 	}
 
+	function handlePlay(direction: boolean, from_instruction_id: number | undefined = undefined) {
+		if (last_play_instruction_id === instruction_id && from_instruction_id === undefined) {
+			instruction_id++;
+			return;
+		}
+
+		if ((end_selected_instruction && direction) || (first_selected_instruction && !direction)) {
+			instruction_id++;
+			return;
+		}
+
+		const local_instruction_id =
+			from_instruction_id != undefined ? from_instruction_id : ++instruction_id;
+		last_play_instruction_id = local_instruction_id;
+
+		setTimeout(() => {
+			if (local_instruction_id === instruction_id) {
+				handleHorizontalMove(direction, false);
+				handlePlay(direction, local_instruction_id);
+			}
+		}, RubikConfig.moves.durations.play);
+	}
+
 	function new_prompte() {
 		prompt_id += 1;
 		prompt_period = true;
@@ -355,43 +400,43 @@
 		switch (event.keyCode) {
 			case 32:
 				// space
-				handleResolve()
+				handleResolve();
 				break;
 			case 13:
 				// enter
-				handleInsert()
+				handleInsert();
 				break;
 			case 8:
 				// backspace
-				handleDelete()
+				handleDelete();
 				break;
 			case 46:
 				// delete
-				handleReset()
+				handleReset();
 				break;
 			case 82:
 				// r
-				handleRandom()
+				handleRandom();
 				break;
 			case 88:
 				// x
-				handleDimension()
+				handleDimension();
 				break;
 			case 37:
 				// left
-				handleHorizontalMove(false)
+				handleHorizontalMove(false);
 				break;
 			case 38:
 				// up
-				handleVerticalMove(true)
+				handleVerticalMove(true);
 				break;
 			case 39:
 				// left
-				handleHorizontalMove(true)
+				handleHorizontalMove(true);
 				break;
 			case 38:
 				// down
-				handleVerticalMove(false)
+				handleVerticalMove(false);
 				break;
 			default:
 				break;
@@ -406,35 +451,42 @@
 	<div class="text-container">
 		<div class="display">
 			<div class="screen" style="opacity: {rubik_mode ? 0.1 : 1};">
-				<div class="header" style="opacity: {rubik_mode ? 0.1 : 1};">
+				<div class="header">
 					<p class="w-12">{output_mode ? 'output' : 'output'}</p>
 					<p>
-						<span class="w-[18px] text-end">{selected + Number(!end_selected)}</span>/<span
-						class="w-[18px] text-end">{instructions.length}</span
-					></p>
+						<span class="w-[18px] text-end">{selected + Number(!end_selected_instruction)}</span
+						>/<span class="w-[18px] text-end">{instructions.length}</span>
+					</p>
 					<p>G{selected_group}</p>
 					<p class="w-[52px] text-end">{time} s</p>
 				</div>
-				<div class="instructions" style="opacity: {rubik_mode ? 0.1 : 1};">
+				<div class="instructions">
 					{#each output_mode ? $ResultStore : inputs as instruction, index}
-						<p class:selected-input={index === selected && prompt_period} class="screen-instruction">
+						<p
+							class:selected-input={index === selected && prompt_period}
+							class="screen-instruction"
+						>
 							{instruction}
 						</p>
 					{/each}
 					{#if !output_mode && inputs.length < max_instructions}
-						<span class:selected-input={end_selected && prompt_period} class="input">&nbsp;</span>
+						<span class:selected-input={end_selected_instruction && prompt_period} class="input"
+							>&nbsp;</span
+						>
 					{/if}
 				</div>
 			</div>
 			<RubikComponent show={rubik_mode} bind:input_rubik bind:output_rubik {output_mode} />
 		</div>
-		<div class="clipboard-container">
-		<button on:click={handleCopy}>copy</button>
-		{#if !output_mode}
-			|
-			<button on:click={handlePaste}>paste</button>
+		{#if !rubik_mode}
+			<div class="clipboard-container">
+				<button on:click={handleCopy}>copy</button>
+				{#if !output_mode}
+					|
+					<button on:click={handlePaste}>paste</button>
+				{/if}
+			</div>
 		{/if}
-		</div>
 		<p class="imprimed-title">
 			<spane class="text-red-300">R</spane><spane class="text-green-300">u</spane><spane
 				class="text-yellow-300">b</spane
@@ -484,8 +536,12 @@
 			>
 			<button class="physic-button left-rotation bottom-button">itr</button>
 			<button class="physic-button left-rotation bottom-button">an</button>
-			<button class="physic-button left-rotation move-button">{'<~'}</button>
-			<button class="physic-button right-rotation move-button">{'~>'}</button>
+			<button class="physic-button left-rotation move-button" on:click={() => handlePlay(false)}
+				>{'<~'}</button
+			>
+			<button class="physic-button right-rotation move-button" on:click={() => handlePlay(true)}
+				>{'~>'}</button
+			>
 			<button class="physic-button right-rotation bottom-button" on:click={handleDimension}
 				>rbk</button
 			>
