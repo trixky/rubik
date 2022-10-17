@@ -349,6 +349,53 @@
 		prompt_cycle();
 	}
 
+	let HandleKeyDown = (event: any) => {
+		switch (event.keyCode) {
+			case 32:
+				// space
+				handleResolve()
+				break;
+			case 13:
+				// enter
+				handleInsert()
+				break;
+			case 8:
+				// backspace
+				handleDelete()
+				break;
+			case 46:
+				// delete
+				handleReset()
+				break;
+			case 82:
+				// r
+				handleRandom()
+				break;
+			case 88:
+				// x
+				handleDimension()
+				break;
+			case 37:
+				// left
+				handleHorizontalMove(false)
+				break;
+			case 38:
+				// up
+				handleVerticalMove(true)
+				break;
+			case 39:
+				// left
+				handleHorizontalMove(true)
+				break;
+			case 38:
+				// down
+				handleVerticalMove(false)
+				break;
+			default:
+				break;
+		}
+	};
+
 	new_prompte();
 </script>
 
@@ -445,6 +492,8 @@
 		</div>
 	</div>
 </div>
+
+<svelte:window on:keydown|preventDefault={HandleKeyDown} />
 
 <!-- ========================= CSS -->
 <style lang="postcss">

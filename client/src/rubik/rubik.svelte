@@ -20,8 +20,6 @@
 		output_rubik?.visible(false);
 	}
 
-	let HandleKeyDown = (e: any) => {};
-
 	onMount(async () => {
 		const engine = new Engine(266, 250, canvas);
 
@@ -34,7 +32,6 @@
 
 <!-- ========================= HTML -->
 <canvas bind:this={canvas} class="rubik" style="opacity: {show ? '1' : '0'};" />
-<svelte:window on:keydown|preventDefault={HandleKeyDown} />
 
 <!-- ========================= CSS -->
 <style lang="postcss">
