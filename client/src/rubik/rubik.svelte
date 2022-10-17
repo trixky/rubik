@@ -12,6 +12,10 @@
 
 	let canvas: any;
 
+	let engine: Engine;
+
+	$: engine?.setCameraMovement(show);
+
 	$: if (output_mode) {
 		input_rubik?.visible(false);
 		output_rubik?.visible(true);
@@ -21,7 +25,7 @@
 	}
 
 	onMount(async () => {
-		const engine = new Engine(266, 250, canvas);
+		engine = new Engine(266, 250, canvas);
 
 		output_rubik = new Rubik(await generateCubes(), engine);
 		output_rubik.visible(false);
@@ -31,7 +35,7 @@
 </script>
 
 <!-- ========================= HTML -->
-<canvas bind:this={canvas} class="rubik" class:show={show} />
+<canvas bind:this={canvas} class="rubik" class:show />
 
 <!-- ========================= CSS -->
 <style lang="postcss">
@@ -40,6 +44,6 @@
 	}
 
 	.rubik.show {
-		@apply hover:cursor-pointer opacity-100
+		@apply hover:cursor-pointer opacity-100;
 	}
 </style>

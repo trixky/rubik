@@ -40,4 +40,8 @@ export default class engine {
 
 		this.tick();
 	}
+
+	setCameraMovement(free: boolean) {
+		this.controls.enableRotate = free;
+	}
 }
