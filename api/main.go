@@ -38,8 +38,8 @@ func doCorrection() {
 		sumTime += arrTime[i]
 	} 
 	fmt.Println("50 solutions of size between 0 and 5:")
-	fmt.Println("average solution length =", sumTime / 50, "moves")
-	fmt.Println("average solution time   =", sumLen / 50, "ms")
+	fmt.Println("average solution length =", sumTime / float64(len(arrSolLen)), "moves")
+	fmt.Println("average solution time   =", sumLen / float64(len(arrSolLen)), "ms")
 	fmt.Println()
 
 
@@ -65,8 +65,8 @@ func doCorrection() {
 		sumTime += arrTime[i] 
 	} 
 	fmt.Println("50 solutions of size between 5 and 20:")
-	fmt.Println("average solution length =", sumLen / 50, "moves")
-	fmt.Println("average solution time   =", sumTime / 50, "ms")
+	fmt.Println("average solution length =", sumLen / float64(len(arrSolLen)), "moves")
+	fmt.Println("average solution time   =", sumTime / float64(len(arrSolLen)), "ms")
 	fmt.Println()
 
 
@@ -92,8 +92,8 @@ func doCorrection() {
 		sumTime += arrTime[i] 
 	} 
 	fmt.Println("50 solutions of size between 20 and 100:")
-	fmt.Println("average solution length =", sumLen / 50, "moves")
-	fmt.Println("average solution time   =", sumTime / 50, "ms")
+	fmt.Println("average solution length =", sumLen / float64(len(arrSolLen)), "moves")
+	fmt.Println("average solution time   =", sumTime / float64(len(arrSolLen)), "ms")
 	fmt.Println()
 
 	superflips := []string{

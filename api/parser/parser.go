@@ -82,7 +82,7 @@ func ReadArgs() (verbose bool, random bool, correction bool, sequence []string) 
 		} else if arg == "-c" || arg == "--correction" {
 			correction = true
 			return
-		}else {
+		} else {
 			if (string(arg[0]) == "-") {
 				wrongInputUsage("option: " + arg + " is not an option")
 			}
