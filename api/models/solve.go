@@ -75,7 +75,7 @@ func idaStar(node *Cube, group int, tables *tables) []string {
 	}
 }
 
-func SolveSequence(verbose bool, sequence []string) []string {
+func SolveSequence(server bool, verbose bool, sequence []string) []string {
 	tables := &tables{}
 	tables.setTables()
 
@@ -90,7 +90,7 @@ func SolveSequence(verbose bool, sequence []string) []string {
 	}
 
 	var totalSequenceSolve []string
-	for group := whichGroup(node); group < 4; group++ {
+	for group := 0; group < 4; group++ {
 		node.move = ""
 		
 		start := time.Now()
@@ -99,6 +99,10 @@ func SolveSequence(verbose bool, sequence []string) []string {
 		node.rotateSequence(groupSequence)
 		
 		totalSequenceSolve = append(totalSequenceSolve, groupSequence...)
+		
+		if server && group != 3 {
+			totalSequenceSolve = append(totalSequenceSolve, ",")
+		}
 
 		if verbose {
 			fmt.Println("Going from group", group, "to", group + 1)

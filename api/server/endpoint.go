@@ -25,7 +25,7 @@ func resolve(w http.ResponseWriter, r *http.Request) {
 	}
 	sequence := strings.Fields(string(body))
 	start := time.Now()
-	result := models.SolveSequence(false, sequence)
+	result := models.SolveSequence(true, false, sequence)
 	duration := time.Since(start)
 	strToFront := fmt.Sprint(duration.Milliseconds()) + " "
 	for _, s := range result {
