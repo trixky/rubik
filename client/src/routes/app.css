@@ -6,6 +6,8 @@
     user-select: none;
     margin: 0;
     padding: 0;
+
+    --main-screen-color: #c9e9c5;
 }
 
 button, p {
