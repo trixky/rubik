@@ -94,6 +94,7 @@
 					if (!ResultStore.setFromString(result)) {
 						alert('api reponse corrupted');
 					} else {
+						fromInput();
 						tick().then(() => {
 							output_rubik?.pushMove($ResultStore.instructions[0].instruction);
 						});
@@ -238,6 +239,7 @@
 			new_prompte();
 
 			if (output_mode) {
+				console.log('### supermove (output_mode)');
 				const initial_selected_output = selected_output;
 
 				if (direction) {
@@ -267,6 +269,7 @@
 					}
 				}
 			} else {
+				console.log('### supermove (!output_mode)');
 				const initial_selected_input = selected_input;
 
 				if (direction) {
@@ -394,19 +397,38 @@
 		}
 	}
 
-	function handleReset() {
+	async function sleep(message: string | undefined = undefined) {
+		if (message) {
+			console.log('sleep:', message);
+		}
+
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				resolve(true);
+			}, 2000);
+		});
+	}
+
+	async function handleReset() {
 		if (can_handle_reset) {
 			instruction_id++;
+			await sleep('1');
 
 			if (output_mode) {
+				await sleep('2');
 				handleHorizontalSuperMove(false, true, RubikConfig.moves.durations.nitro);
+				await sleep('3');
 				ResultStore.reset();
 			}
-			tick().then(() => {
-				handleHorizontalSuperMove(false, true, RubikConfig.moves.durations.nitro);
-				inputs = [];
-				new_prompte();
-			});
+
+			await sleep('4');
+			handleHorizontalSuperMove(false, true, RubikConfig.moves.durations.nitro);
+			await sleep('5');
+			toInput();
+			await sleep('6');
+			inputs = [];
+
+			new_prompte();
 		}
 	}
 
@@ -443,8 +465,12 @@
 			instruction_id++;
 
 			if (output_mode) {
+				sleep('1');
 				handleHorizontalSuperMove(false, true, RubikConfig.moves.durations.nitro);
+				sleep('2');
 				ResultStore.reset();
+				sleep('3');
+				toInput();
 			} else {
 				const initial_instruction = inputs[selected_input];
 
@@ -536,6 +562,15 @@
 		prompt_id += 1;
 		prompt_period = true;
 		prompt_cycle();
+	}
+
+	function fromInput() {
+		inputs.forEach((instruction) => output_rubik?.pushMove(instruction, false, 0));
+	}
+
+	function toInput() {
+		console.log('toInput');
+		inputs.reverse().forEach((instruction) => output_rubik?.pushMove(instruction, true, 0));
 	}
 
 	let HandleKeyDown = (event: any) => {
