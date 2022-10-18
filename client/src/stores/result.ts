@@ -1,22 +1,24 @@
 import { writable } from 'svelte/store';
-import SanitizeInput from '../sanitizers/input';
+import SanitizeApiInput from '../sanitizers/api_input';
+import type Result from '../models/result';
 
 function createResult() {
-	const { subscribe, set } = writable(<string[]>[]);
+	const { subscribe, set } = writable(<Result>{ instructions: [], time: 0 });
 
 	return {
 		subscribe,
 		set,
 		setFromString: (input: string): boolean => {
 			try {
-				set(SanitizeInput(input));
-			} catch {
+				set(SanitizeApiInput(input));
+			} catch (err) {
+				console.log(err);
 				return false;
 			}
 
 			return true;
 		},
-		reset: () => set(<string[]>[])
+		reset: () => set(<Result>{ instructions: [], time: 0 })
 	};
 }
 
