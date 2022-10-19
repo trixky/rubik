@@ -94,14 +94,20 @@
 					if (!ResultStore.setFromString(result)) {
 						alert('api reponse corrupted');
 					} else {
-						await tick();
-						fromInput();
-						await tick();
-						output_rubik?.pushMove($ResultStore.instructions[0].instruction);
+						if ($ResultStore.instructions.length > 0) {
+							await tick();
+							fromInput();
+							await tick();
+							output_rubik?.pushMove($ResultStore.instructions[0].instruction);
+						} else {
+							alert('the rubik is already resolved despite the mixture');
+						}
 					}
 				})
-				.catch(() => {
+				.catch((err) => {
 					loading = false;
+					console.log('err:');
+					console.log(err);
 					alert('an error occured from api');
 				});
 		}
