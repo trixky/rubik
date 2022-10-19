@@ -834,6 +834,10 @@
 		filter: brightness(80%);
 	}
 
+	.physic-button:focus {
+		outline: none;
+	}
+
 	.instruction-button {
 		background-color: azure;
 	}
