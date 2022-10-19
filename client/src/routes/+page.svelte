@@ -9,18 +9,22 @@
 	import RubikConfig from '../rubik/config';
 	import { tick } from 'svelte';
 
+	// --------------------------- constantes
 	const screen_rows = 7;
 	const screen_columns = 8;
 	const max_instructions = screen_rows * screen_columns;
 	const max_selected_input = max_instructions - 1;
 
-	let loading = false;
+	// --------------------------- rubiks
 	let input_rubik: Rubik | undefined = undefined;
 	let output_rubik: Rubik | undefined = undefined;
 
-	$: output_mode = $ResultStore.instructions.length > 0;
+	// --------------------------- states
+	let loading = false;
 	let rubik_mode = false;
+	$: output_mode = $ResultStore.instructions.length > 0;
 
+	// --------------------------- prompt/selection
 	let prompt_id = 0;
 	let prompt_period = false;
 	let inputs: string[] = [];
@@ -49,7 +53,7 @@
 		? $ResultStore.instructions[selected_output].group.toString()
 		: '0';
 
-	// ------------------- can handle
+	// --------------------------- can handle
 	$: can_handle_resolve = !(output_mode || input_is_empty || loading) && !loading;
 	$: can_handle_play = !(last_selected_instruction || end_selected_instruction) && !loading;
 	$: can_handle_play_back =
@@ -72,6 +76,8 @@
 		can_handle_horizontal_left_move || (first_selected_instruction && !loading);
 	$: can_handle_vertical_down_move = can_handle_horizontal_right_move;
 
+	// *************************** utils functions
+	// move the prompt safely by checking some conditions
 	function selectSafe(index: number): number {
 		if (index < 0) return 0;
 		if (index > max_selected_input) return max_selected_input;
@@ -83,6 +89,8 @@
 		return index;
 	}
 
+	// *************************** handlers functions
+	// resolve the input by calling the api and show the response in the output
 	function handleResolve() {
 		if (can_handle_resolve) {
 			loading = true;
@@ -111,6 +119,7 @@
 		}
 	}
 
+	// add a new instruction
 	async function handleInstruction(instruction: string) {
 		if (can_handle_instruction) {
 			instruction_id++;
@@ -118,7 +127,7 @@
 			if (!output_mode) {
 				const selected_input_value = inputs[selected_input];
 				if (selected_input_value != undefined && selected_input_value[0] === instruction[0]) {
-					// If overwrite same instruction type
+					// if overwrite same instruction type
 					const base = instruction[0];
 
 					switch ((selected_input_value + instruction).replaceAll(base, 'X')) {
@@ -155,28 +164,31 @@
 				}
 
 				if (!end_selected_instruction) {
-					// If overwrite an different instruction type
+					// if overwrite an different instruction type
 					input_rubik?.pushMove(inputs[selected_input], true);
 					inputs[selected_input] = instruction;
 				} else if (inputs.length < max_instructions) {
-					// If write a new instruction
+					// if write a new instruction
 					inputs = [...inputs, instruction];
 				}
 
+				// push the animation
 				input_rubik?.pushMove(instruction);
 				await tick();
+				// move to the right
 				handleHorizontalMove(true);
 			}
 		}
 	}
 
+	// move to right and left in the screen
 	function handleHorizontalMove(direction: boolean, new_instruction = true) {
 		if (
 			(direction && can_handle_horizontal_right_move) ||
 			(!direction && can_handle_horizontal_left_move)
 		) {
 			if (new_instruction) instruction_id++;
-			new_prompte();
+			new_prompt();
 
 			if (output_mode) {
 				const initial_selected_output = selected_output;
@@ -228,6 +240,7 @@
 		}
 	}
 
+	// move to start and end in the screen
 	function handleHorizontalSuperMove(
 		direction: boolean,
 		zero = false,
@@ -239,7 +252,7 @@
 			(!direction && can_handle_horizontal_left_super_move)
 		) {
 			instruction_id++;
-			new_prompte();
+			new_prompt();
 
 			if (output_mode) {
 				const initial_selected_output = selected_output;
@@ -299,13 +312,14 @@
 		}
 	}
 
+	// move to up and down in the screen
 	function handleVerticalMove(direction: boolean, duration = RubikConfig.moves.durations.fast) {
 		if (
 			(direction && can_handle_vertical_up_move) ||
 			(!direction && can_handle_vertical_down_move)
 		) {
 			instruction_id++;
-			new_prompte();
+			new_prompt();
 
 			if (output_mode) {
 				const initial_selected_output = selected_output;
@@ -373,14 +387,17 @@
 		}
 	}
 
+	// play instruction by instruction each corresponding animation
 	function handlePlay(direction: boolean, from_instruction_id: number | undefined = undefined) {
 		if ((direction && can_handle_play) || (!direction && can_handle_play_back)) {
 			if (last_play_instruction_id === instruction_id && from_instruction_id === undefined) {
+				// if play status is interupted #1
 				instruction_id++;
 				return;
 			}
 
 			if ((end_selected_instruction && direction) || (first_selected_instruction && !direction)) {
+				// if play status is interupted #2
 				instruction_id++;
 				return;
 			}
@@ -390,39 +407,86 @@
 			last_play_instruction_id = local_instruction_id;
 
 			setTimeout(() => {
+				// create a cycle by recursivity
 				if (local_instruction_id === instruction_id) {
 					handleHorizontalMove(direction, false);
+					// call the next move
 					handlePlay(direction, local_instruction_id);
 				}
 			}, RubikConfig.moves.durations.play);
 		}
 	}
 
+	// reset input and output
 	async function handleReset() {
 		if (can_handle_reset) {
 			instruction_id++;
 			const from_output_mode = output_mode;
 
 			if (from_output_mode) {
+				// if in output mode
+				// reset outputs
 				handleHorizontalSuperMove(false, true, RubikConfig.moves.durations.nitro);
 				ResultStore.reset();
 				await tick();
 			}
 
+			// reset input
 			handleHorizontalSuperMove(false, true, RubikConfig.moves.durations.nitro);
 			if (from_output_mode) toInput();
 			inputs = [];
 
-			new_prompte();
+			new_prompt();
 		}
 	}
 
+	// delete an instruction or reset output
+	function handleDelete() {
+		if (can_handle_delete) {
+			instruction_id++;
+
+			if (output_mode) {
+				// if in output mode
+				// reset the output result and back to inputs
+				handleHorizontalSuperMove(false, true, RubikConfig.moves.durations.nitro);
+				toInput();
+				ResultStore.reset();
+			} else {
+				const initial_instruction = inputs[selected_input];
+
+				// delete the current selected instruction
+				if (last_selected_instruction) {
+					inputs = inputs.slice(0, selected_input);
+				} else if (!end_selected_instruction) {
+					inputs = [...inputs.slice(0, selected_input), ...inputs.slice(selected_input + 1)];
+				} else {
+					handleHorizontalMove(false);
+				}
+
+				// get the new current selected instruction
+				const superseding_instruction = inputs[selected_input];
+
+				if (initial_instruction != superseding_instruction) {
+					// push the correspondig animation
+					if (initial_instruction != undefined) {
+						input_rubik?.pushMove(initial_instruction, true);
+						if (superseding_instruction != undefined) {
+							input_rubik?.pushMove(superseding_instruction, false);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// insert a new default instruction
 	function handleInsert() {
 		if (can_handle_insert) {
 			instruction_id++;
 
 			if (!output_mode) {
 				if (input_is_full) {
+					// if the input is full
 					handleInstruction(StaticInstructions.physical_instructions[0]);
 				} else {
 					const initial_instruction = inputs[selected_input];
@@ -436,6 +500,7 @@
 					const superseding_instruction = inputs[selected_input];
 
 					if (initial_instruction != superseding_instruction) {
+						// push the correspondig animation
 						if (initial_instruction != undefined) input_rubik?.pushMove(initial_instruction, true);
 						if (superseding_instruction != undefined)
 							input_rubik?.pushMove(superseding_instruction, false);
@@ -445,68 +510,32 @@
 		}
 	}
 
-	function handleDelete() {
-		if (can_handle_delete) {
-			instruction_id++;
-
-			if (output_mode) {
-				handleHorizontalSuperMove(false, true, RubikConfig.moves.durations.nitro);
-				toInput();
-				ResultStore.reset();
-			} else {
-				const initial_instruction = inputs[selected_input];
-
-				if (last_selected_instruction) {
-					inputs = inputs.slice(0, selected_input);
-				} else if (!end_selected_instruction) {
-					inputs = [...inputs.slice(0, selected_input), ...inputs.slice(selected_input + 1)];
-				} else {
-					handleHorizontalMove(false);
-				}
-
-				const superseding_instruction = inputs[selected_input];
-
-				if (initial_instruction != superseding_instruction) {
-					if (initial_instruction != undefined) {
-						input_rubik?.pushMove(initial_instruction, true);
-						if (superseding_instruction != undefined) {
-							input_rubik?.pushMove(superseding_instruction, false);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	function prompt_cycle() {
-		const current_prompt_id = prompt_id;
-		setTimeout(() => {
-			if (current_prompt_id === prompt_id) {
-				prompt_period = !prompt_period;
-				prompt_cycle();
-			}
-		}, 500);
-	}
-
-	function handleDimension() {
+	// show or hide rubik visualization
+	function handleVisualization() {
 		rubik_mode = !rubik_mode;
 	}
 
+	// generate a new input random set of instruction
 	function handleRandom() {
 		if (can_handle_random) {
 			instruction_id++;
 
 			if (!output_mode) {
+				// back to the initiale state
 				handleHorizontalSuperMove(false, true);
 
+				// generate a random number between a minimum and a maximum
 				function getRandomNumber(min: number, max: number): number {
 					return Math.floor(min + Math.random() * max);
 				}
 
+				// get the random number of instruction to generate
 				const instruction_nbr = getRandomNumber(1, max_instructions);
 
+				// reset the inputs
 				inputs = [];
 
+				// generate the random instruction to inputs
 				for (let i = 0; i < instruction_nbr; i++)
 					inputs.push(
 						StaticInstructions.instructions[
@@ -514,11 +543,13 @@
 						]
 					);
 
+				// push the first instruction animation if exists
 				if (inputs.length > 0) input_rubik?.pushMove(inputs[0]);
 			}
 		}
 	}
 
+	// handle the copy methode of the clipboard
 	function handleCopy() {
 		if (output_mode) {
 			navigator.clipboard.writeText($ResultStore.instructions.join(' '));
@@ -527,6 +558,7 @@
 		}
 	}
 
+	// handle the past methode of the clipboard
 	function handlePaste() {
 		if (!output_mode) {
 			navigator.clipboard.readText().then((cliptext) => {
@@ -540,21 +572,41 @@
 		}
 	}
 
-	function new_prompte() {
+	// manage the prompt cycle for create a blink effect
+	function prompt_cycle() {
+		const current_prompt_id = prompt_id;
+
+		setTimeout(() => {
+			if (current_prompt_id === prompt_id) {
+				// if the prompt is the same as at the start
+				prompt_period = !prompt_period;
+				// continue the cycle by recursivity
+				prompt_cycle();
+			}
+		}, 500);
+	}
+
+	// restart the prompt by creating a new one
+	function new_prompt() {
+		// change the prompt id for delte current prompt cycle
 		prompt_id += 1;
+		// active the new prompt
 		prompt_period = true;
+		// start a new cycle for the new prompt
 		prompt_cycle();
 	}
 
-	function fromInput() {
-		inputs.forEach((instruction) => output_rubik?.pushMove(instruction, false, 0));
-	}
-
+	// play the input mixture animations for inintialize the output rubik
 	function toInput() {
 		inputs
 			.slice()
 			.reverse()
 			.forEach((instruction) => output_rubik?.pushMove(instruction, true, 0));
+	}
+
+	// play back the input mixture animations for reset the output rubik
+	function fromInput() {
+		inputs.forEach((instruction) => output_rubik?.pushMove(instruction, false, 0));
 	}
 
 	let HandleKeyDown = (event: any) => {
@@ -581,7 +633,7 @@
 				break;
 			case 88:
 				// x
-				handleDimension();
+				handleVisualization();
 				break;
 			case 37:
 				// left
@@ -612,7 +664,7 @@
 		}
 	};
 
-	new_prompte();
+	new_prompt();
 </script>
 
 <!-- ========================= HTML -->
@@ -731,7 +783,6 @@
 				on:click={() => handleHorizontalMove(false)}
 				disabled={!can_handle_horizontal_left_move}>{'<'}</button
 			>
-			<!-- <button class="physic-button left-rotation bottom-button">itr</button> -->
 			<button
 				class="physic-button right-rotation move-button"
 				on:click={() => handleHorizontalMove(true)}
@@ -748,7 +799,7 @@
 				disabled={!can_handle_vertical_down_move}>{'v'}</button
 			>
 			<button class="invisible" disabled>?</button>
-			<button class="physic-button left-rotation bottom-button" on:click={handleDimension}
+			<button class="physic-button left-rotation bottom-button" on:click={handleVisualization}
 				>rbk</button
 			>
 			<button
