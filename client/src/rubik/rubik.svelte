@@ -17,20 +17,30 @@
 	$: engine?.setCameraMovement(show);
 
 	$: if (output_mode) {
+		// if output mode
+		// hide the input rubik
 		input_rubik?.visible(false);
+		// show the output rubik
 		output_rubik?.visible(true);
 	} else {
+		// if input mode
+		// show the input rubik
 		input_rubik?.visible(true);
+		// hide the output rubik
 		output_rubik?.visible(false);
 	}
 
 	onMount(async () => {
 		engine = new Engine(266, 250, canvas);
 
+		// create the output rubik
 		output_rubik = new Rubik(await generateCubes(), engine);
+		// hide the  the output rubik
 		output_rubik.visible(false);
+		// create the input rubik
 		input_rubik = new Rubik(await generateCubes(), engine);
-		output_rubik.visible(true);
+		// show the  the input rubik
+		input_rubik.visible(false);
 	});
 </script>
 

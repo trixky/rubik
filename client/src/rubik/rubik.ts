@@ -26,17 +26,27 @@ export class Rubik {
 		this.moving = false;
 	}
 
+	// push a move to the stack
 	pushMove(instruction: string, reverse = false, duration = Config.moves.durations.slow) {
 		if (instruction.length === 2) {
+			// if handle a "complex" instruction
+
+			// extractt the basic instruction from it
 			const basic_instruction = instruction[0];
 
 			if (instruction[1] === '2') {
+				// if the instruction extension is "2" (double)
+				// split the "complexe" instruction in two basic instruction
 				this.pushMove(basic_instruction, reverse, duration);
 				this.pushMove(basic_instruction, reverse, duration);
 			} else {
+				// else is the instruction extension "'" (reverse)
+				// call the reverse corresponding basic instruction
 				this.pushMove(basic_instruction, !reverse, duration);
 			}
 		} else {
+			// else is a basic instruction
+			// push the instruction
 			(() => {
 				switch (instruction) {
 					case 'F':
@@ -54,21 +64,29 @@ export class Rubik {
 				}
 			}).bind(this)();
 
+			// play the stacked moves
 			this.nextMove();
 		}
 	}
 
+	// play the stacked moves
 	async nextMove(force_moving = false) {
 		if (!this.moving || force_moving) {
+			// if the stack is not already being played
+			// block it
 			this.moving = true;
 
+			// extract the next move
 			const move = this.moves.shift();
 
 			if (move) {
+				// if a move as been extracted
+				// reset the pivot
 				this.pivot.rotation.set(0, 0, 0);
 
 				const attached_cubes: THREE.Mesh[] = [];
 
+				// attach each concerned cubes to the pivot
 				this.cubes.forEach((cube) => {
 					if (cube.position[move.axe] === move.depth) {
 						attached_cubes.push(cube);
@@ -76,11 +94,13 @@ export class Rubik {
 					}
 				});
 
+				// play a rotation on the pivot
 				await gsap.to(this.pivot.rotation, {
 					duration: move.duration,
 					[move.axe]: move.reverse ? quarterTurn : -quarterTurn
 				});
 
+				// attach back the concerned cubes to the scene
 				attached_cubes.forEach((cube) => {
 					this.engine.scene.attach(cube);
 					move.otherAxis.forEach((axe) => {
@@ -88,6 +108,7 @@ export class Rubik {
 					});
 				});
 
+				// play next move with recursivity
 				await this.nextMove(true);
 			}
 
@@ -95,6 +116,7 @@ export class Rubik {
 		}
 	}
 
+	// show or hide the rubik
 	visible(visible: boolean) {
 		this.cubes.forEach((cube) => {
 			cube.visible = visible;

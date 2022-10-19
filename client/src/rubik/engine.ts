@@ -41,6 +41,7 @@ export default class engine {
 		this.tick();
 	}
 
+	// block or unblock the camera
 	setCameraMovement(free: boolean) {
 		this.controls.enableRotate = free;
 	}

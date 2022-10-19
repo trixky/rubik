@@ -41,6 +41,7 @@ async function generateFacesFromPosition(position: THREE.Vector3) {
 	];
 }
 
+// generate cubes for a rubik
 export default async function generateCubes(): Promise<THREE.Mesh[]> {
 	const geometry = new THREE.BoxGeometry(1, 1, 1);
 
