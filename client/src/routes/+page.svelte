@@ -104,22 +104,18 @@
 						}
 					}
 				})
-				.catch((err) => {
+				.catch(() => {
 					loading = false;
-					console.log('err:');
-					console.log(err);
 					alert('an error occured from api');
 				});
 		}
 	}
 
-	function handleInstruction(instruction: string) {
+	async function handleInstruction(instruction: string) {
 		if (can_handle_instruction) {
 			instruction_id++;
 
-			if (output_mode) {
-				// search
-			} else {
+			if (!output_mode) {
 				const selected_input_value = inputs[selected_input];
 				if (selected_input_value != undefined && selected_input_value[0] === instruction[0]) {
 					// If overwrite same instruction type
@@ -168,6 +164,7 @@
 				}
 
 				input_rubik?.pushMove(instruction);
+				await tick();
 				handleHorizontalMove(true);
 			}
 		}
