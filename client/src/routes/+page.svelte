@@ -681,6 +681,7 @@
 			><spane class="text-neutral-300">4</spane>
 		</p>
 		<div class="physic-button-container">
+			<button class="invisible" disabled>?</button>
 			<button
 				class="physic-button left-rotation red-button"
 				on:click={handleReset}
@@ -692,17 +693,16 @@
 				disabled={!can_handle_delete}>del</button
 			>
 			<button
-				class="physic-button left-rotation"
+				class="physic-button right-rotation"
 				on:click={handleInsert}
 				disabled={!can_handle_insert}>ins</button
 			>
-			<button class="physic-button right-rotation" disabled={!can_handle_group}>grp</button>
 			<button
 				class="physic-button right-rotation"
 				on:click={handleRandom}
 				disabled={!can_handle_random}>ran</button
 			>
-			<button class="physic-button right-rotation">on</button>
+			<button class="invisible" disabled>?</button>
 			{#each StaticInstructions.physical_instructions as instruction, index}
 				<button
 					class="physic-button instruction-button {index % 6 >= 3
@@ -729,6 +729,7 @@
 				on:click={() => handleHorizontalMove(false)}
 				disabled={!can_handle_horizontal_left_move}>{'<'}</button
 			>
+			<!-- <button class="physic-button left-rotation bottom-button">itr</button> -->
 			<button
 				class="physic-button right-rotation move-button"
 				on:click={() => handleHorizontalMove(true)}
@@ -744,8 +745,10 @@
 				on:click={() => handleVerticalMove(false)}
 				disabled={!can_handle_vertical_down_move}>{'v'}</button
 			>
-			<button class="physic-button left-rotation bottom-button">itr</button>
-			<button class="physic-button left-rotation bottom-button">an</button>
+			<button class="invisible" disabled>?</button>
+			<button class="physic-button left-rotation bottom-button" on:click={handleDimension}
+				>rbk</button
+			>
 			<button
 				class="physic-button left-rotation move-button"
 				on:click={() => handlePlay(false)}
@@ -756,14 +759,12 @@
 				on:click={() => handlePlay(true)}
 				disabled={!can_handle_play}>{'~>'}</button
 			>
-			<button class="physic-button right-rotation bottom-button" on:click={handleDimension}
-				>rbk</button
-			>
 			<button
 				class="physic-button right-rotation bottom-button"
 				on:click={handleResolve}
 				disabled={!can_handle_resolve}>rsl</button
 			>
+			<button class="invisible" disabled>?</button>
 		</div>
 	</div>
 </div>
@@ -807,7 +808,7 @@
 	}
 
 	.physic-button-container {
-		@apply grid grid-cols-6 grid-rows-5 gap-2 mt-5 mb-0;
+		@apply grid grid-cols-6 grid-rows-5 gap-2 mt-6 mb-0;
 	}
 
 	.physic-button-container > button {
