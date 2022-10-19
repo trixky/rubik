@@ -825,12 +825,12 @@
 		background-color: #eee;
 	}
 
-	.physic-button:hover {
+	.physic-button:not(disabled):not([disabled]):not(:disabled):hover {
 		filter: brightness(92%);
 		cursor: pointer;
 	}
 
-	.physic-button:hover:active {
+	.physic-button:not(disabled):not([disabled]):not(:disabled):hover:active {
 		filter: brightness(80%);
 	}
 
