@@ -673,13 +673,15 @@
 				{/if}
 			</div>
 		{/if}
-		<p class="imprimed-title">
-			<spane class="text-red-300">R</spane><spane class="text-green-300">u</spane><spane
-				class="text-yellow-300">b</spane
-			><spane class="text-blue-300">i</spane><spane class="text-orange-300">k</spane><spane
-				class="text-neutral-300">6</spane
-			><spane class="text-neutral-300">4</spane>
-		</p>
+		<a href="https://github.com/trixky/rubik" target="_blank">
+			<h1 class="imprimed-title">
+				<spane class="text-red-300">R</spane><spane class="text-green-300">u</spane><spane
+					class="text-yellow-300">b</spane
+				><spane class="text-blue-300">i</spane><spane class="text-orange-300">k</spane><spane
+					class="text-neutral-300">6</spane
+				><spane class="text-neutral-300">4</spane>
+			</h1>
+		</a>
 		<div class="physic-button-container">
 			<button class="invisible" disabled>?</button>
 			<button
