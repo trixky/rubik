@@ -65,38 +65,6 @@ func (c *Cube) initialize() {
 }
 
 
-func (c *Cube) rotateSequence(words []string) {
-	for _, s := range words {
-		c.rotate(s)
-	}
-}
-
-func (c *Cube) rotate(move string) {
-	amount := 1
-	if len(move) == 2 {
-		if move[1] == '\'' {
-			amount = 3
-		} else if move[1] == '2' {
-			amount = 2
-		}
-	}
-	switch move[0] {
-	case 'U':
-		c.rotateUp(amount)
-	case 'D':
-		c.rotateDown(amount)
-	case 'L':
-		c.rotateLeft(amount)
-	case 'R':
-		c.rotateRight(amount)
-	case 'F':
-		c.rotateFront(amount)
-	case 'B':
-		c.rotateBack(amount)
-	}
-	c.move = move
-}
-
 const Green		= "\x1B[32m"
 const Yellow	= "\x1B[33m"
 const Reset		= "\x1B[0m"
@@ -162,6 +130,39 @@ func (cube *Cube) Print(group int) {
 	fmt.Printf("|%s|\n", strings.Repeat("-", 71))
 }
 
+
+func (c *Cube) rotateSequence(words []string) {
+	for _, s := range words {
+		c.rotate(s)
+	}
+}
+
+func (c *Cube) rotate(move string) {
+	amount := 1
+	if len(move) == 2 {
+		if move[1] == '\'' {
+			amount = 3
+		} else if move[1] == '2' {
+			amount = 2
+		}
+	}
+	switch move[0] {
+	case 'U':
+		c.rotateUp(amount)
+	case 'D':
+		c.rotateDown(amount)
+	case 'L':
+		c.rotateLeft(amount)
+	case 'R':
+		c.rotateRight(amount)
+	case 'F':
+		c.rotateFront(amount)
+	case 'B':
+		c.rotateBack(amount)
+	}
+	c.move = move
+}
+
 func (c *Cube) rotateUp(nbRotations int) {
 	for i := 0; i < nbRotations; i++ {
 		tmpPos := c.cornerPos[urf]
@@ -170,11 +171,11 @@ func (c *Cube) rotateUp(nbRotations int) {
 		c.cornerPos[ulb] = c.cornerPos[ufl] 
 		c.cornerPos[ufl] = tmpPos			
 
-		tmpOri := c.cornerOri[urf]
-		c.cornerOri[urf] = (2 + c.cornerOri[ubr]) % 3
-		c.cornerOri[ubr] = (1 + c.cornerOri[ulb]) % 3
-		c.cornerOri[ulb] = (2 + c.cornerOri[ufl]) % 3
-		c.cornerOri[ufl] = (1 + tmpOri) % 3
+		c.cornerOri[c.cornerPos[ulb]] = (2 + c.cornerOri[c.cornerPos[ulb]]) % 3
+		c.cornerOri[c.cornerPos[urf]] = (2 + c.cornerOri[c.cornerPos[urf]]) % 3
+		c.cornerOri[c.cornerPos[ufl]] = (1 + c.cornerOri[c.cornerPos[ufl]]) % 3
+		c.cornerOri[c.cornerPos[ubr]] = (1 + c.cornerOri[c.cornerPos[ubr]]) % 3
+
 
 		tmpPos = c.edgePos[uf]
 		c.edgePos[uf] = c.edgePos[ur]  
@@ -182,11 +183,10 @@ func (c *Cube) rotateUp(nbRotations int) {
 		c.edgePos[ub] = c.edgePos[ul] 
 		c.edgePos[ul] = tmpPos		  
 
-		tmpOri = c.edgeOri[uf]
-		c.edgeOri[uf] = 1 - c.edgeOri[ur]
-		c.edgeOri[ur] = 1 - c.edgeOri[ub]
-		c.edgeOri[ub] = 1 - c.edgeOri[ul]
-		c.edgeOri[ul] = 1 - tmpOri
+		c.edgeOri[c.edgePos[uf]] = 1 - c.edgeOri[c.edgePos[uf]]
+		c.edgeOri[c.edgePos[ur]] = 1 - c.edgeOri[c.edgePos[ur]]
+		c.edgeOri[c.edgePos[ub]] = 1 - c.edgeOri[c.edgePos[ub]]
+		c.edgeOri[c.edgePos[ul]] = 1 - c.edgeOri[c.edgePos[ul]]
 	}
 }
 
@@ -198,11 +198,11 @@ func (c *Cube) rotateDown(nbRotations int) {
 		c.cornerPos[dbl] = c.cornerPos[drb] 
 		c.cornerPos[drb] = tmpPos			
 
-		tmpOri := c.cornerOri[dfr]
-		c.cornerOri[dfr] = (2 + c.cornerOri[dlf]) % 3
-		c.cornerOri[dlf] = (1 + c.cornerOri[dbl]) % 3
-		c.cornerOri[dbl] = (2 + c.cornerOri[drb]) % 3
-		c.cornerOri[drb] = (1 + tmpOri) % 3
+		c.cornerOri[c.cornerPos[dlf]] = (2 + c.cornerOri[c.cornerPos[dlf]]) % 3
+		c.cornerOri[c.cornerPos[drb]] = (2 + c.cornerOri[c.cornerPos[drb]]) % 3
+		c.cornerOri[c.cornerPos[dbl]] = (1 + c.cornerOri[c.cornerPos[dbl]]) % 3
+		c.cornerOri[c.cornerPos[dfr]] = (1 + c.cornerOri[c.cornerPos[dfr]]) % 3
+
 
 		tmpPos = c.edgePos[df]
 		c.edgePos[df] = c.edgePos[dl]	
@@ -210,11 +210,10 @@ func (c *Cube) rotateDown(nbRotations int) {
 		c.edgePos[db] = c.edgePos[dr]	
 		c.edgePos[dr] = tmpPos			 
 
-		tmpOri = c.edgeOri[df]
-		c.edgeOri[df] = 1 - c.edgeOri[dl]
-		c.edgeOri[dl] = 1 - c.edgeOri[db]
-		c.edgeOri[db] = 1 - c.edgeOri[dr]
-		c.edgeOri[dr] = 1 - tmpOri
+		c.edgeOri[c.edgePos[df]] = 1 - c.edgeOri[c.edgePos[df]]
+		c.edgeOri[c.edgePos[dl]] = 1 - c.edgeOri[c.edgePos[dl]]
+		c.edgeOri[c.edgePos[db]] = 1 - c.edgeOri[c.edgePos[db]]
+		c.edgeOri[c.edgePos[dr]] = 1 - c.edgeOri[c.edgePos[dr]]
 	}
 }
 
@@ -226,23 +225,17 @@ func (c *Cube) rotateFront(nbRotations int) {
 		c.cornerPos[dlf] = c.cornerPos[dfr] 
 		c.cornerPos[dfr] = tmpPos			
 
-		tmpOri := c.cornerOri[urf]
-		c.cornerOri[urf] = (1 + c.cornerOri[ufl]) % 3
-		c.cornerOri[ufl] = (2 + c.cornerOri[dlf]) % 3
-		c.cornerOri[dlf] = (1 + c.cornerOri[dfr]) % 3
-		c.cornerOri[dfr] = (2 + tmpOri) % 3
+		c.cornerOri[c.cornerPos[dlf]] = (1 + c.cornerOri[c.cornerPos[dlf]]) % 3
+		c.cornerOri[c.cornerPos[urf]] = (1 + c.cornerOri[c.cornerPos[urf]]) % 3
+		c.cornerOri[c.cornerPos[ufl]] = (2 + c.cornerOri[c.cornerPos[ufl]]) % 3
+		c.cornerOri[c.cornerPos[dfr]] = (2 + c.cornerOri[c.cornerPos[dfr]]) % 3
+
 
 		tmpPos = c.edgePos[uf]
 		c.edgePos[uf] = c.edgePos[fl]
 		c.edgePos[fl] = c.edgePos[df]
 		c.edgePos[df] = c.edgePos[fr] 
-		c.edgePos[fr] = tmpPos		  
-
-		tmpOri = c.edgeOri[uf]
-		c.edgeOri[uf] = c.edgeOri[fl]
-		c.edgeOri[fl] = c.edgeOri[df]
-		c.edgeOri[df] = c.edgeOri[fr]
-		c.edgeOri[fr] = tmpOri
+		c.edgePos[fr] = tmpPos
 	}
 }
 
@@ -254,24 +247,17 @@ func (c *Cube) rotateBack(nbRotations int) {
 		c.cornerPos[dbl] = c.cornerPos[ulb] 
 		c.cornerPos[ulb] = tmpPos			
 
-		tmpOri := c.cornerOri[ubr]
-		c.cornerOri[ubr] = (1 + c.cornerOri[drb]) % 3
-		c.cornerOri[drb] = (2 + c.cornerOri[dbl]) % 3
-		c.cornerOri[dbl] = (1 + c.cornerOri[ulb]) % 3
-		c.cornerOri[ulb] = (2 + tmpOri) % 3
-		
+		c.cornerOri[c.cornerPos[ulb]] = (1 + c.cornerOri[c.cornerPos[ulb]]) % 3
+		c.cornerOri[c.cornerPos[drb]] = (1 + c.cornerOri[c.cornerPos[drb]]) % 3
+		c.cornerOri[c.cornerPos[dbl]] = (2 + c.cornerOri[c.cornerPos[dbl]]) % 3
+		c.cornerOri[c.cornerPos[ubr]] = (2 + c.cornerOri[c.cornerPos[ubr]]) % 3
+	
 		
 		tmpPos = c.edgePos[ub]
 		c.edgePos[ub] = c.edgePos[br] 
 		c.edgePos[br] = c.edgePos[db] 
 		c.edgePos[db] = c.edgePos[bl]
 		c.edgePos[bl] = tmpPos
-
-		tmpOri = c.edgeOri[ub]
-		c.edgeOri[ub] = c.edgeOri[br]
-		c.edgeOri[br] = c.edgeOri[db]
-		c.edgeOri[db] = c.edgeOri[bl]
-		c.edgeOri[bl] = tmpOri
 	}
 }
 
@@ -282,25 +268,13 @@ func (c *Cube) rotateLeft(nbRotations int) {
 		c.cornerPos[dbl] = c.cornerPos[dlf] 
 		c.cornerPos[dlf] = c.cornerPos[ufl] 
 		c.cornerPos[ufl] = tmpPos			
+		
 
-		tmpOri := c.cornerOri[ulb]
-		c.cornerOri[ulb] = c.cornerOri[dbl]
-		c.cornerOri[dbl] = c.cornerOri[dlf]
-		c.cornerOri[dlf] = c.cornerOri[ufl]
-		c.cornerOri[ufl] = tmpOri
-		
-		
 		tmpPos = c.edgePos[ul]
 		c.edgePos[ul] = c.edgePos[bl]
 		c.edgePos[bl] = c.edgePos[dl]
 		c.edgePos[dl] = c.edgePos[fl]
 		c.edgePos[fl] = tmpPos
-
-		tmpOri = c.edgeOri[ul]
-		c.edgeOri[ul] = c.edgeOri[bl]
-		c.edgeOri[bl] = c.edgeOri[dl]
-		c.edgeOri[dl] = c.edgeOri[fl]
-		c.edgeOri[fl] = tmpOri
 	}
 }
 
@@ -311,29 +285,16 @@ func (c *Cube) rotateRight(nbRotations int) {
 		c.cornerPos[dfr] = c.cornerPos[drb] 
 		c.cornerPos[drb] = c.cornerPos[ubr] 
 		c.cornerPos[ubr] = tmpPos			
-
-		tmpOri := c.cornerOri[urf]
-		c.cornerOri[urf] = c.cornerOri[dfr]
-		c.cornerOri[dfr] = c.cornerOri[drb]
-		c.cornerOri[drb] = c.cornerOri[ubr]
-		c.cornerOri[ubr] = tmpOri
-		
 		
 		tmpPos = c.edgePos[ur]
 		c.edgePos[ur] = c.edgePos[fr] 
 		c.edgePos[fr] = c.edgePos[dr] 
 		c.edgePos[dr] = c.edgePos[br] 
 		c.edgePos[br] = tmpPos		  
-
-		tmpOri = c.edgeOri[ur]
-		c.edgeOri[ur] = c.edgeOri[fr]
-		c.edgeOri[fr] = c.edgeOri[dr]
-		c.edgeOri[dr] = c.edgeOri[br]
-		c.edgeOri[br] = tmpOri
 	}
 }
 
-func makeCubeFromSequence(sequence []string) *Cube {
+func MakeCubeFromSequence(sequence []string) *Cube {
 	cube := &Cube{}
 	cube.initialize()
 	cube.rotateSequence(sequence)

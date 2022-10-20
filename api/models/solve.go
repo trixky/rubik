@@ -19,7 +19,9 @@ func heuristic(node *Cube, group int, tables *tables) int {
 	if group == 0 {
 		return int(tables.Table0[edgeOriToInt(node.edgeOri)])
 	} else if group == 1 {
-		return int(tables.Table1[tables.T1EdgePosIndex[edgePosToInt(node.edgePos)]][cornerOriToInt(node.cornerOri)])
+		indexEdgePos := tables.T1EdgePosIndex[edgePosToInt(node.edgePos)]
+		indexCornerOri := cornerOriToInt(node.cornerOri)
+		return int(tables.Table1[indexEdgePos][indexCornerOri])
 	} else if group == 2 {
 		return int(tables.Table2[cPosToInt(node.cornerPos)][tables.T2EdgePosIndex[edgePosToIntT2(node.edgePos)]])
 	} else {
@@ -79,7 +81,7 @@ func SolveSequence(server bool, verbose bool, sequence []string) []string {
 	tables := &tables{}
 	tables.setTables()
 
-	node := makeCubeFromSequence(sequence)
+	node := MakeCubeFromSequence(sequence)
 
 	if verbose {
 		fmt.Println("This is the cube after doing your sequence :")

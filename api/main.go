@@ -19,8 +19,8 @@ func doCorrection() {
 	arrTime := []float64{}
 	arrSolLen := []float64{}
 
-	for i := 0; i < 50; i++ {
-		sequence := parser.RandomSequence(0, randGen.Intn(6))
+	for i := 0; i < 30; i++ {
+		sequence := parser.RandomSequence(1, randGen.Intn(6))
 		// fmt.Println("sequence ", i, ":", sequence)
 		start := time.Now()
 		result := models.SolveSequence(false, false, sequence)
@@ -37,7 +37,7 @@ func doCorrection() {
 		sumLen += arrSolLen[i]
 		sumTime += arrTime[i]
 	} 
-	fmt.Println("50 solutions of size between 0 and 5:")
+	fmt.Println("30 solutions of size between 1 and 5:")
 	fmt.Println("average solution length =", sumTime / float64(len(arrSolLen)), "moves")
 	fmt.Println("average solution time   =", sumLen / float64(len(arrSolLen)), "ms")
 	fmt.Println()
@@ -46,7 +46,7 @@ func doCorrection() {
 	arrTime = []float64{}
 	arrSolLen = []float64{}
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 30; i++ {
 		sequence := parser.RandomSequence(5, randGen.Intn(21))
 		// fmt.Println("sequence ", i, ":", sequence)
 		start := time.Now()
@@ -64,7 +64,7 @@ func doCorrection() {
 		sumLen += arrSolLen[i] 
 		sumTime += arrTime[i] 
 	} 
-	fmt.Println("50 solutions of size between 5 and 20:")
+	fmt.Println("30 solutions of size between 5 and 20:")
 	fmt.Println("average solution length =", sumLen / float64(len(arrSolLen)), "moves")
 	fmt.Println("average solution time   =", sumTime / float64(len(arrSolLen)), "ms")
 	fmt.Println()
@@ -73,7 +73,7 @@ func doCorrection() {
 	arrTime = []float64{}
 	arrSolLen = []float64{}
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 30; i++ {
 		sequence := parser.RandomSequence(20, randGen.Intn(100))
 		// fmt.Println("sequence ", i, ":", sequence)
 		start := time.Now()
@@ -91,7 +91,8 @@ func doCorrection() {
 		sumLen += arrSolLen[i] 
 		sumTime += arrTime[i] 
 	} 
-	fmt.Println("50 solutions of size between 20 and 100:")
+	fmt.Println()
+	fmt.Println("30 solutions of size between 20 and 100:")
 	fmt.Println("average solution length =", sumLen / float64(len(arrSolLen)), "moves")
 	fmt.Println("average solution time   =", sumTime / float64(len(arrSolLen)), "ms")
 	fmt.Println()
@@ -236,13 +237,13 @@ func main() {
 		
 		if correction == true {
 			doCorrection()
-			os.Exit(0)
+			return
 		}
 		if random == true {
 			source := rand.NewSource(time.Now().UnixNano())
 			randGen := rand.New(source)
 
-			sequence = parser.RandomSequence(-1, randGen.Intn(51))
+			sequence = parser.RandomSequence(-1, randGen.Intn(50))
 		}
 
 		fmt.Println("sequence:")
