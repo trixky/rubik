@@ -787,8 +787,13 @@
 		}, Config.shake_animation.first);
 	}
 
-	startShake();
+	// *************************** about functions
+	function scrollToAbout() {
+		const html_element = document.getElementById('html');
+		html_element?.scrollTo({ top: html_element.scrollHeight, behavior: 'smooth' });
+	}
 
+	startShake();
 	new_prompt();
 </script>
 
@@ -964,6 +969,9 @@
 			<button class="invisible" disabled>?</button>
 		</div>
 	</div>
+	<div class="about">
+		<h2 on:click={scrollToAbout}>About</h2>
+	</div>
 </div>
 
 <svelte:window on:keydown|preventDefault={HandleKeyDown} />
@@ -1106,5 +1114,14 @@
 
 	button.right-shake {
 		animation: right-shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+	}
+
+	.about {
+		@apply absolute text-center m-auto w-full left-0 bottom-0 mb-3;
+	}
+
+	.about > h2 {
+		@apply inline-block opacity-20 hover:opacity-100 transition-all duration-200 hover:cursor-pointer;
+		font-size: 1.1em;
 	}
 </style>

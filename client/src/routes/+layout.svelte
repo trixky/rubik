@@ -6,8 +6,17 @@
 </script>
 
 <!-- ========================= HTML -->
-<Header />
-<main class="flex h-full">
-	<slot />
-</main>
-<Footer />
+<div id="chat" class="body-container">
+	<Header />
+	<main class="flex h-full">
+		<slot />
+	</main>
+	<Footer />
+</div>
+
+<!-- ========================= CSS -->
+<style lang="postcss">
+	.body-container {
+		@apply h-full;
+	}
+</style>
