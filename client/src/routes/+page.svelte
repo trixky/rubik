@@ -545,7 +545,7 @@
 	}
 
 	// generate a new input random set of instruction
-	function handleRandom() {
+	async function handleRandom() {
 		if (can_handle_random) {
 			instruction_id++;
 			shake_ran_button_clicked = true;
@@ -569,7 +569,12 @@
 					);
 
 				// push the first instruction animation if exists
-				if (inputs.length > 0) input_rubik?.pushMove(inputs[0]);
+				if (inputs.length > 0) {
+					await tick();
+					input_rubik?.pushMove(inputs[0], false, RubikConfig.moves.durations.nitro);
+					await tick();
+					handleHorizontalSuperMove(true);
+				}
 			}
 		}
 	}
