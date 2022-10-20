@@ -143,6 +143,8 @@
 							await tick();
 							fromInput();
 							await tick();
+							output_rubik?.pushMove($ResultStore.instructions[0].instruction);
+							await tick();
 							handleHorizontalSuperMove(true);
 						} else {
 							alert('the rubik is already resolved despite the mixture');
