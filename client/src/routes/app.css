@@ -13,3 +13,26 @@
 button, p {
     font-size: 0.84em;
 }
+
+@keyframes left-shake {
+    10%,
+    90% {
+        transform: rotate(-8deg) translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: rotate(-8deg) translate3d(1px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: rotate(-8deg) translate3d(-2px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: rotate(-8deg) translate3d(2px, 0, 0);
+    }
+}

@@ -7,6 +7,8 @@
 	import RubikComponent from '../rubik/rubik.svelte';
 	import type { Rubik } from '../rubik/rubik';
 	import RubikConfig from '../rubik/config';
+	import Config from '../config';
+	import { getRangedRandomNumber } from '../utils/random';
 	import { tick } from 'svelte';
 
 	// --------------------------- constantes
@@ -22,6 +24,8 @@
 	// --------------------------- states
 	let loading = false;
 	let rubik_mode = false;
+	let shake_rbk_button = false;
+	let shake_rbk_button_clicked = false;
 	$: output_mode = $ResultStore.instructions.length > 0;
 
 	// --------------------------- prompt/selection
@@ -60,7 +64,6 @@
 		!first_selected_instruction &&
 		!(end_selected_instruction && instructions.length === 1) &&
 		!loading;
-	$: can_handle_group = output_mode && !loading;
 	$: can_handle_random = !output_mode && !loading;
 	$: can_handle_insert = !output_mode && !loading;
 	$: can_handle_reset = (output_mode || !instructions_is_empty) && !loading;
@@ -525,6 +528,7 @@
 
 	// show or hide rubik visualization
 	function handleVisualization() {
+		shake_rbk_button_clicked = true;
 		rubik_mode = !rubik_mode;
 	}
 
@@ -537,13 +541,8 @@
 				// back to the initiale state
 				handleHorizontalSuperMove(false, true);
 
-				// generate a random number between a minimum and a maximum
-				function getRandomNumber(min: number, max: number): number {
-					return Math.floor(min + Math.random() * max);
-				}
-
 				// get the random number of instruction to generate
-				const instruction_nbr = getRandomNumber(1, max_instructions);
+				const instruction_nbr = getRangedRandomNumber(1, max_instructions);
 
 				// reset the inputs
 				inputs = [];
@@ -552,7 +551,7 @@
 				for (let i = 0; i < instruction_nbr; i++)
 					inputs.push(
 						StaticInstructions.instructions[
-							getRandomNumber(0, StaticInstructions.instructions.length)
+							getRangedRandomNumber(0, StaticInstructions.instructions.length)
 						]
 					);
 
@@ -677,6 +676,19 @@
 		}
 	};
 
+	function randomShake() {
+		setTimeout(() => {
+			shake_rbk_button = false;
+			setTimeout(() => {
+				if (!shake_rbk_button_clicked) {
+					shake_rbk_button = true;
+					randomShake();
+				}
+			}, getRangedRandomNumber(Config.rbk_button.shake_animation.min_time_to_start, Config.rbk_button.shake_animation.max_time_to_start));
+		}, Config.rbk_button.shake_animation.pause);
+	}
+	randomShake();
+
 	new_prompt();
 </script>
 
@@ -750,21 +762,25 @@
 		<div class="physic-button-container">
 			<button class="invisible" disabled>?</button>
 			<button
+				title="reset"
 				class="physic-button left-rotation red-button"
 				on:click={handleReset}
 				disabled={!can_handle_reset}>rst</button
 			>
 			<button
+				title="delete / back to input"
 				class="physic-button left-rotation red-button"
 				on:click={handleDelete}
 				disabled={!can_handle_delete}>del</button
 			>
 			<button
+				title="insert"
 				class="physic-button right-rotation"
 				on:click={handleInsert}
 				disabled={!can_handle_insert}>ins</button
 			>
 			<button
+				title="random"
 				class="physic-button right-rotation"
 				on:click={handleRandom}
 				disabled={!can_handle_random}>ran</button
@@ -772,6 +788,7 @@
 			<button class="invisible" disabled>?</button>
 			{#each StaticInstructions.physical_instructions as instruction, index}
 				<button
+					title={'[' + instruction.toLocaleLowerCase() + '] instruction'}
 					class="physic-button instruction-button {index % 6 >= 3
 						? 'right-rotation'
 						: 'left-rotation'}"
@@ -779,53 +796,64 @@
 					disabled={!can_handle_instruction}>{instruction.toLocaleLowerCase()}</button
 				>
 			{/each}
-
 			<button
+				title="move up"
 				class="physic-button left-rotation move-button"
 				style="rotate: 180deg;"
 				on:click={() => handleVerticalMove(true)}
 				disabled={!can_handle_vertical_up_move}>{'v'}</button
 			>
 			<button
+				title="move at the start"
 				class="physic-button left-rotation move-button"
 				on:click={() => handleHorizontalSuperMove(false)}
 				disabled={!can_handle_horizontal_left_super_move}>{'<<'}</button
 			>
 			<button
+				title="move left"
 				class="physic-button left-rotation move-button"
 				on:click={() => handleHorizontalMove(false)}
 				disabled={!can_handle_horizontal_left_move}>{'<'}</button
 			>
 			<button
+				title="move right"
 				class="physic-button right-rotation move-button"
 				on:click={() => handleHorizontalMove(true)}
 				disabled={!can_handle_horizontal_right_move}>{'>'}</button
 			>
 			<button
+				title="move at the end"
 				class="physic-button right-rotation move-button"
 				on:click={() => handleHorizontalSuperMove(true)}
 				disabled={!can_handle_horizontal_right_super_move}>{'>>'}</button
 			>
 			<button
+				title="move down"
 				class="physic-button right-rotation move-button"
 				on:click={() => handleVerticalMove(false)}
 				disabled={!can_handle_vertical_down_move}>{'v'}</button
 			>
 			<button class="invisible" disabled>?</button>
-			<button class="physic-button left-rotation bottom-button" on:click={handleVisualization}
-				>rbk</button
+			<button
+				title="rubik visualizator"
+				class:left-shake={shake_rbk_button}
+				class="physic-button left-rotation bottom-button"
+				on:click={handleVisualization}>rbk</button
 			>
 			<button
+				title="play back / stop"
 				class="physic-button left-rotation move-button"
 				on:click={() => handlePlay(false)}
 				disabled={!can_handle_play_back}>{'<~'}</button
 			>
 			<button
+				title="play / stop"
 				class="physic-button right-rotation move-button"
 				on:click={() => handlePlay(true)}
 				disabled={!can_handle_play}>{'~>'}</button
 			>
 			<button
+				title="resolve instructions"
 				class="physic-button right-rotation bottom-button"
 				on:click={handleResolve}
 				disabled={!can_handle_resolve}>rsl</button
@@ -967,5 +995,9 @@
 	button:disabled.red-button,
 	button[disabled].red-button {
 		@apply text-red-400;
+	}
+
+	button.left-shake {
+		animation: left-shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 	}
 </style>
