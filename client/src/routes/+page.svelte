@@ -60,7 +60,9 @@
 	$: input_is_empty = inputs.length === 0;
 
 	$: selected_group = output_mode
-		? $ResultStore.instructions[selected_output].group.toString()
+		? last_selected_instruction
+			? '4'
+			: ($ResultStore.instructions[selected_output].group - 1).toString()
 		: '0';
 
 	// --------------------------- can handle
