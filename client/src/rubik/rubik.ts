@@ -101,9 +101,13 @@ export class Rubik {
 				// (the more the stack is filled, the faster the movements are)
 				const stack_speed_divider = this.moves.length === 0 ? 1 : 1 + Math.log(this.moves.length);
 
+				const instant_speed = this.moves.length > Config.moves.instant;
+
+				const duration = instant_speed ? 0 : move.duration / stack_speed_divider;
+
 				// play a rotation on the pivot
 				await gsap.to(this.pivot.rotation, {
-					duration: move.duration / stack_speed_divider,
+					duration,
 					[move.axe]: move.reverse ? quarterTurn : -quarterTurn
 				});
 
