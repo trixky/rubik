@@ -778,6 +778,7 @@
 		}, Config.shake_animation.pause);
 	}
 
+	// shake the shake flow
 	function startShake() {
 		setTimeout(() => {
 			if (!shake_rbk_button_clicked) {
@@ -788,6 +789,7 @@
 	}
 
 	// *************************** about functions
+	// scroll to the bottom of the window
 	function scrollToAbout() {
 		const html_element = document.getElementById('html');
 		html_element?.scrollTo({ top: html_element.scrollHeight, behavior: 'smooth' });
@@ -811,7 +813,7 @@
 						>/<span class="w-[18px] text-end">{instructions.length}</span>
 					</p>
 					<p style="opacity: {output_mode ? 1 : 0.3};">G{selected_group}</p>
-					<p style="opacity: {output_mode ? 1 : 0.3};" class="w-[52px] text-end">
+					<p style="opacity: {output_mode ? 1 : 0.3};" class="w-[58px] text-end">
 						{$ResultStore.time} ms
 					</p>
 				</div>
