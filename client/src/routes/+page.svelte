@@ -687,7 +687,17 @@
 			}, getRangedRandomNumber(Config.rbk_button.shake_animation.min_time_to_start, Config.rbk_button.shake_animation.max_time_to_start));
 		}, Config.rbk_button.shake_animation.pause);
 	}
-	randomShake();
+
+	function startRandomShake() {
+		setTimeout(() => {
+			if (!shake_rbk_button_clicked) {
+				shake_rbk_button = true;
+				randomShake();
+			}
+		}, Config.rbk_button.shake_animation.first);
+	}
+
+	startRandomShake();
 
 	new_prompt();
 </script>
