@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import Move from '../models/move';
 import Config from './config';
 import type Engine from './engine';
+import { tick } from 'svelte';
 
 const quarterTurn = Math.PI / 2;
 
@@ -65,7 +66,9 @@ export class Rubik {
 			}).bind(this)();
 
 			// play the stacked moves
-			this.nextMove();
+			tick().then(() => {
+				this.nextMove();
+			});
 		}
 	}
 
@@ -94,9 +97,13 @@ export class Rubik {
 					}
 				});
 
+				// compute the stack speed divider
+				// (the more the stack is filled, the faster the movements are)
+				const stack_speed_divider = this.moves.length === 0 ? 1 : 1 + Math.log(this.moves.length);
+
 				// play a rotation on the pivot
 				await gsap.to(this.pivot.rotation, {
-					duration: move.duration,
+					duration: move.duration / stack_speed_divider,
 					[move.axe]: move.reverse ? quarterTurn : -quarterTurn
 				});
 
