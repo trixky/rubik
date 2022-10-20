@@ -8,6 +8,8 @@
     padding: 0;
 
     --main-screen-color: #c9e9c5;
+    --main-small-left-rotation: -8deg;
+    --main-small-right-rotation: 8deg;
 }
 
 button, p {
@@ -17,22 +19,45 @@ button, p {
 @keyframes left-shake {
     10%,
     90% {
-        transform: rotate(-8deg) translate3d(-1px, 0, 0);
+        transform: rotate(var(--main-small-left-rotation)) translate3d(-1px, 0, 0);
     }
 
     20%,
     80% {
-        transform: rotate(-8deg) translate3d(2px, 0, 0);
+        transform: rotate(var(--main-small-left-rotation)) translate3d(2px, 0, 0);
     }
 
     30%,
     50%,
     70% {
-        transform: rotate(-8deg) translate3d(-3px, 0, 0);
+        transform: rotate(var(--main-small-left-rotation)) translate3d(-3px, 0, 0);
     }
 
     40%,
     60% {
-        transform: rotate(-8deg) translate3d(4px, 0, 0);
+        transform: rotate(var(--main-small-left-rotation)) translate3d(4px, 0, 0);
+    }
+}
+
+@keyframes right-shake {
+    10%,
+    90% {
+        transform: rotate(var(--main-small-right-rotation)) translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: rotate(var(--main-small-right-rotation)) translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: rotate(var(--main-small-right-rotation)) translate3d(-3px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: rotate(var(--main-small-right-rotation)) translate3d(4px, 0, 0);
     }
 }

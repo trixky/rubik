@@ -24,9 +24,17 @@
 	// --------------------------- states
 	let loading = false;
 	let rubik_mode = false;
+	$: output_mode = $ResultStore.instructions.length > 0;
+
+	// --------------------------- shaking
 	let shake_rbk_button = false;
 	let shake_rbk_button_clicked = false;
-	$: output_mode = $ResultStore.instructions.length > 0;
+	let shake_ran_button = false;
+	let shake_ran_button_clicked = false;
+	let shake_super_right_button = false;
+	let shake_super_right_button_clicked = false;
+	let shake_resolve_button = false;
+	let shake_resolve_button_clicked = false;
 
 	// --------------------------- prompt/selection
 	let prompt_id = 0;
@@ -123,6 +131,7 @@
 		if (can_handle_resolve) {
 			loading = true;
 			instruction_id++;
+			shake_resolve_button_clicked = true;
 
 			ApiPostResolve(input_str)
 				.then(async (result) => {
@@ -269,6 +278,7 @@
 		) {
 			instruction_id++;
 			new_prompt();
+			if (direction) shake_super_right_button_clicked = true;
 
 			if (output_mode) {
 				const initial_selected_output = selected_output;
@@ -536,6 +546,7 @@
 	function handleRandom() {
 		if (can_handle_random) {
 			instruction_id++;
+			shake_ran_button_clicked = true;
 
 			if (!output_mode) {
 				// back to the initiale state
@@ -561,66 +572,7 @@
 		}
 	}
 
-	// handle the copy methode of the clipboard
-	function handleCopy() {
-		if (output_mode) {
-			navigator.clipboard.writeText($ResultStore.instructions.join(' '));
-		} else {
-			navigator.clipboard.writeText(input_str);
-		}
-	}
-
-	// handle the past methode of the clipboard
-	function handlePaste() {
-		if (!output_mode) {
-			navigator.clipboard.readText().then((cliptext) => {
-				try {
-					const clip_instructions = SanitizeInput(cliptext);
-					inputs = clip_instructions;
-				} catch {
-					alert('input bad formatted');
-				}
-			});
-		}
-	}
-
-	// manage the prompt cycle for create a blink effect
-	function prompt_cycle() {
-		const current_prompt_id = prompt_id;
-
-		setTimeout(() => {
-			if (current_prompt_id === prompt_id) {
-				// if the prompt is the same as at the start
-				prompt_period = !prompt_period;
-				// continue the cycle by recursivity
-				prompt_cycle();
-			}
-		}, 500);
-	}
-
-	// restart the prompt by creating a new one
-	function new_prompt() {
-		// change the prompt id for delte current prompt cycle
-		prompt_id += 1;
-		// active the new prompt
-		prompt_period = true;
-		// start a new cycle for the new prompt
-		prompt_cycle();
-	}
-
-	// play the input mixture animations for inintialize the output rubik
-	function toInput() {
-		inputs
-			.slice()
-			.reverse()
-			.forEach((instruction) => output_rubik?.pushMove(instruction, true, 0));
-	}
-
-	// play back the input mixture animations for reset the output rubik
-	function fromInput() {
-		inputs.forEach((instruction) => output_rubik?.pushMove(instruction, false, 0));
-	}
-
+	// listen keyboard events
 	let HandleKeyDown = (event: any) => {
 		switch (event.keyCode) {
 			case 32:
@@ -676,28 +628,166 @@
 		}
 	};
 
-	function randomShake() {
+	// *************************** clipboard functions
+	// handle the copy methode of the clipboard
+	function handleCopy() {
+		if (output_mode) {
+			navigator.clipboard.writeText($ResultStore.instructions.join(' '));
+		} else {
+			navigator.clipboard.writeText(input_str);
+		}
+	}
+
+	// handle the past methode of the clipboard
+	function handlePaste() {
+		if (!output_mode) {
+			navigator.clipboard.readText().then((cliptext) => {
+				try {
+					const clip_instructions = SanitizeInput(cliptext);
+					inputs = clip_instructions;
+				} catch {
+					alert('input bad formatted');
+				}
+			});
+		}
+	}
+
+	// *************************** prompt functions
+	// manage the prompt cycle for create a blink effect
+	function prompt_cycle() {
+		const current_prompt_id = prompt_id;
+
+		setTimeout(() => {
+			if (current_prompt_id === prompt_id) {
+				// if the prompt is the same as at the start
+				prompt_period = !prompt_period;
+				// continue the cycle by recursivity
+				prompt_cycle();
+			}
+		}, 500);
+	}
+
+	// restart the prompt by creating a new one
+	function new_prompt() {
+		// change the prompt id for delte current prompt cycle
+		prompt_id += 1;
+		// active the new prompt
+		prompt_period = true;
+		// start a new cycle for the new prompt
+		prompt_cycle();
+	}
+
+	// *************************** input <> output functions
+	// play the input mixture animations for inintialize the output rubik
+	function toInput() {
+		inputs
+			.slice()
+			.reverse()
+			.forEach((instruction) => output_rubik?.pushMove(instruction, true, 0));
+	}
+
+	// play back the input mixture animations for reset the output rubik
+	function fromInput() {
+		inputs.forEach((instruction) => output_rubik?.pushMove(instruction, false, 0));
+	}
+
+	// *************************** shaker functions
+	// shake the resolve button randomly
+	function resolveShake() {
+		setTimeout(() => {
+			shake_resolve_button = false;
+			setTimeout(() => {
+				if (!shake_resolve_button_clicked) {
+					shake_resolve_button = true;
+					superRightShake();
+				}
+			}, getRangedRandomNumber(Config.shake_animation.min_time_to_start, Config.shake_animation.max_time_to_start));
+		}, Config.shake_animation.pause);
+	}
+
+	// shake the super right button randomly
+	function superRightShake() {
+		setTimeout(() => {
+			shake_super_right_button = false;
+			setTimeout(() => {
+				if (!shake_super_right_button_clicked && !shake_resolve_button_clicked) {
+					shake_super_right_button = true;
+					superRightShake();
+				} else {
+					setTimeout(() => {
+						if (!shake_resolve_button_clicked) {
+							shake_resolve_button = true;
+						}
+						resolveShake();
+					}, Config.shake_animation.next);
+				}
+			}, getRangedRandomNumber(Config.shake_animation.min_time_to_start, Config.shake_animation.max_time_to_start));
+		}, Config.shake_animation.pause);
+	}
+
+	// shake the random button randomly
+	function shakeRan() {
+		setTimeout(() => {
+			shake_ran_button = false;
+			setTimeout(() => {
+				if (
+					!shake_ran_button_clicked &&
+					!shake_super_right_button_clicked &&
+					!shake_resolve_button_clicked
+				) {
+					shake_ran_button = true;
+					shakeRan();
+				} else {
+					setTimeout(() => {
+						if (!shake_super_right_button_clicked && !shake_resolve_button_clicked) {
+							shake_super_right_button = true;
+						}
+						superRightShake();
+					}, Config.shake_animation.next);
+				}
+			}, getRangedRandomNumber(Config.shake_animation.min_time_to_start, Config.shake_animation.max_time_to_start));
+		}, Config.shake_animation.pause);
+	}
+
+	// shake the rubik viewer button randomly
+	function shakeRbk() {
 		setTimeout(() => {
 			shake_rbk_button = false;
 			setTimeout(() => {
-				if (!shake_rbk_button_clicked) {
+				if (
+					!shake_rbk_button_clicked &&
+					!shake_ran_button_clicked &&
+					!shake_super_right_button_clicked &&
+					!shake_resolve_button_clicked
+				) {
 					shake_rbk_button = true;
-					randomShake();
+					shakeRbk();
+				} else {
+					setTimeout(() => {
+						if (
+							!shake_ran_button_clicked &&
+							!shake_super_right_button_clicked &&
+							!shake_resolve_button_clicked
+						) {
+							shake_ran_button = true;
+						}
+						shakeRan();
+					}, Config.shake_animation.next);
 				}
-			}, getRangedRandomNumber(Config.rbk_button.shake_animation.min_time_to_start, Config.rbk_button.shake_animation.max_time_to_start));
-		}, Config.rbk_button.shake_animation.pause);
+			}, getRangedRandomNumber(Config.shake_animation.min_time_to_start, Config.shake_animation.max_time_to_start));
+		}, Config.shake_animation.pause);
 	}
 
-	function startRandomShake() {
+	function startShake() {
 		setTimeout(() => {
 			if (!shake_rbk_button_clicked) {
 				shake_rbk_button = true;
-				randomShake();
 			}
-		}, Config.rbk_button.shake_animation.first);
+			shakeRbk();
+		}, Config.shake_animation.first);
 	}
 
-	startRandomShake();
+	startShake();
 
 	new_prompt();
 </script>
@@ -791,6 +881,7 @@
 			>
 			<button
 				title="random"
+				class:right-shake={shake_ran_button}
 				class="physic-button right-rotation"
 				on:click={handleRandom}
 				disabled={!can_handle_random}>ran</button
@@ -833,6 +924,7 @@
 			>
 			<button
 				title="move at the end"
+				class:right-shake={shake_super_right_button}
 				class="physic-button right-rotation move-button"
 				on:click={() => handleHorizontalSuperMove(true)}
 				disabled={!can_handle_horizontal_right_super_move}>{'>>'}</button
@@ -845,7 +937,7 @@
 			>
 			<button class="invisible" disabled>?</button>
 			<button
-				title="rubik visualizator"
+				title="rubik viewer"
 				class:left-shake={shake_rbk_button}
 				class="physic-button left-rotation bottom-button"
 				on:click={handleVisualization}>rbk</button
@@ -864,6 +956,7 @@
 			>
 			<button
 				title="resolve instructions"
+				class:right-shake={shake_resolve_button}
 				class="physic-button right-rotation bottom-button"
 				on:click={handleResolve}
 				disabled={!can_handle_resolve}>rsl</button
@@ -920,11 +1013,11 @@
 	}
 
 	.right-rotation {
-		transform: rotate(8deg);
+		transform: rotate(var(--main-small-right-rotation));
 	}
 
 	.left-rotation {
-		transform: rotate(-8deg);
+		transform: rotate(var(--main-small-left-rotation));
 	}
 
 	.physic-button {
@@ -1009,5 +1102,9 @@
 
 	button.left-shake {
 		animation: left-shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+	}
+
+	button.right-shake {
+		animation: right-shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 	}
 </style>
