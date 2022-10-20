@@ -794,7 +794,7 @@
 						>/<span class="w-[18px] text-end">{instructions.length}</span>
 					</p>
 					<p style="opacity: {output_mode ? 1 : 0.3};">G{selected_group}</p>
-					<p style="opacity: {output_mode ? 1 : 0.3};" class="w-[58px] text-end">
+					<p style="opacity: {output_mode ? 1 : 0.3};" class="w-[66px] text-end">
 						{$ResultStore.time} ms
 					</p>
 				</div>
