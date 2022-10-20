@@ -487,6 +487,11 @@
 				} else if (!end_selected_instruction) {
 					inputs = [...inputs.slice(0, selected_input), ...inputs.slice(selected_input + 1)];
 				} else {
+					if (!input_is_empty) {
+						input_rubik?.pushMove(inputs[selected_input - 1], true);
+						inputs = [...inputs.slice(0, selected_input - 1)];
+					}
+
 					handleHorizontalMove(false);
 				}
 
