@@ -31,8 +31,6 @@
 	let shake_rbk_button_clicked = false;
 	let shake_ran_button = false;
 	let shake_ran_button_clicked = false;
-	let shake_super_right_button = false;
-	let shake_super_right_button_clicked = false;
 	let shake_resolve_button = false;
 	let shake_resolve_button_clicked = false;
 
@@ -280,7 +278,6 @@
 		) {
 			instruction_id++;
 			new_prompt();
-			if (direction) shake_super_right_button_clicked = true;
 
 			if (output_mode) {
 				const initial_selected_output = selected_output;
@@ -705,28 +702,10 @@
 			shake_resolve_button = false;
 			setTimeout(() => {
 				if (!shake_resolve_button_clicked) {
-					shake_resolve_button = true;
-					superRightShake();
-				}
-			}, getRangedRandomNumber(Config.shake_animation.min_time_to_start, Config.shake_animation.max_time_to_start));
-		}, Config.shake_animation.pause);
-	}
-
-	// shake the super right button randomly
-	function superRightShake() {
-		setTimeout(() => {
-			shake_super_right_button = false;
-			setTimeout(() => {
-				if (!shake_super_right_button_clicked && !shake_resolve_button_clicked) {
-					shake_super_right_button = true;
-					superRightShake();
-				} else {
-					setTimeout(() => {
-						if (!shake_resolve_button_clicked) {
-							shake_resolve_button = true;
-						}
-						resolveShake();
-					}, Config.shake_animation.next);
+					if (can_handle_resolve) {
+						shake_resolve_button = true;
+					}
+					resolveShake();
 				}
 			}, getRangedRandomNumber(Config.shake_animation.min_time_to_start, Config.shake_animation.max_time_to_start));
 		}, Config.shake_animation.pause);
@@ -737,19 +716,17 @@
 		setTimeout(() => {
 			shake_ran_button = false;
 			setTimeout(() => {
-				if (
-					!shake_ran_button_clicked &&
-					!shake_super_right_button_clicked &&
-					!shake_resolve_button_clicked
-				) {
-					shake_ran_button = true;
+				if (!shake_ran_button_clicked && !shake_resolve_button_clicked) {
+					if (can_handle_random) {
+						shake_ran_button = true;
+					}
 					shakeRan();
 				} else {
 					setTimeout(() => {
-						if (!shake_super_right_button_clicked && !shake_resolve_button_clicked) {
-							shake_super_right_button = true;
+						if (!shake_resolve_button_clicked && can_handle_resolve) {
+							shake_resolve_button = true;
 						}
-						superRightShake();
+						resolveShake();
 					}, Config.shake_animation.next);
 				}
 			}, getRangedRandomNumber(Config.shake_animation.min_time_to_start, Config.shake_animation.max_time_to_start));
@@ -764,18 +741,13 @@
 				if (
 					!shake_rbk_button_clicked &&
 					!shake_ran_button_clicked &&
-					!shake_super_right_button_clicked &&
 					!shake_resolve_button_clicked
 				) {
 					shake_rbk_button = true;
 					shakeRbk();
 				} else {
 					setTimeout(() => {
-						if (
-							!shake_ran_button_clicked &&
-							!shake_super_right_button_clicked &&
-							!shake_resolve_button_clicked
-						) {
+						if (!shake_ran_button_clicked && !shake_resolve_button_clicked && can_handle_random) {
 							shake_ran_button = true;
 						}
 						shakeRan();
@@ -938,7 +910,6 @@
 			>
 			<button
 				title="move at the end"
-				class:right-shake={shake_super_right_button}
 				class="physic-button right-rotation move-button"
 				on:click={() => handleHorizontalSuperMove(true)}
 				disabled={!can_handle_horizontal_right_super_move}>{'>>'}</button
