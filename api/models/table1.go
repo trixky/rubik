@@ -49,14 +49,14 @@ func createTable1(tables *tables) {
 		*cube,
 	}
 
-	
 	for depth := 1; depth < 9; depth++ {
 		var children []Cube
-		
+
 		fmt.Println("table1: depth =", depth)
 		for _, parent := range parents {
 			for _, move := range GetGroupMoves(1, parent) {
 				child := copyAndMove(&parent, move)
+
 				indexEdgePos := tables.T1EdgePosIndex[edgePosToInt(child.edgePos)]
 				indexCornerOri := cornerOriToInt(child.cornerOri)
 				if ((indexEdgePos > 0 || indexCornerOri > 0) && tables.Table1[indexEdgePos][indexCornerOri] == 0) {

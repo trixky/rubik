@@ -12,7 +12,6 @@ import (
 )
 
 func resolve(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("POST")
 	if r.Method != "POST" {
 		// If the request method is not POST
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -32,5 +31,6 @@ func resolve(w http.ResponseWriter, r *http.Request) {
 		strToFront += s + " "
 	}
 	
+	fmt.Println(strToFront)
 	fmt.Fprintf(w, strToFront)
 }
