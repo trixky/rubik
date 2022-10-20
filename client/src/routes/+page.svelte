@@ -89,6 +89,31 @@
 		return index;
 	}
 
+	function mergeTwoInstruction(first: string, second: string): string {
+		const base = second[0];
+
+		switch ((first + second).replaceAll(base, 'X')) {
+			case 'XX':
+			case "X'X'":
+				input_rubik?.pushMove(second);
+				return base + '2';
+			case 'X2X':
+				input_rubik?.pushMove(second);
+				return base + "'";
+			case "X2X'":
+				input_rubik?.pushMove(second);
+				return base;
+			case "X'X":
+				input_rubik?.pushMove(second);
+				input_rubik?.pushMove(second);
+				return base;
+			default:
+				input_rubik?.pushMove(first, true);
+				input_rubik?.pushMove(second);
+				return second;
+		}
+	}
+
 	// *************************** handlers functions
 	// resolve the input by calling the api and show the response in the output
 	function handleResolve() {
@@ -128,37 +153,10 @@
 				const selected_input_value = inputs[selected_input];
 				if (selected_input_value != undefined && selected_input_value[0] === instruction[0]) {
 					// if overwrite same instruction type
-					const base = instruction[0];
 
-					switch ((selected_input_value + instruction).replaceAll(base, 'X')) {
-						case 'XX':
-						case "X'X'":
-							inputs[selected_input] = base + '2';
-							input_rubik?.pushMove(instruction);
-							handleHorizontalMove(true);
-							break;
-						case 'X2X':
-							inputs[selected_input] = base + "'";
-							input_rubik?.pushMove(instruction);
-							handleHorizontalMove(true);
-							break;
-						case "X2X'":
-							inputs[selected_input] = base;
-							input_rubik?.pushMove(instruction);
-							handleHorizontalMove(true);
-							break;
-						case "X'X":
-							input_rubik?.pushMove(instruction);
-							input_rubik?.pushMove(instruction);
-							inputs[selected_input] = base;
-							handleHorizontalMove(true);
-							break;
-						default:
-							input_rubik?.pushMove(inputs[selected_input], true);
-							input_rubik?.pushMove(instruction);
-							inputs[selected_input] = instruction;
-							break;
-					}
+					const merged_instruction = mergeTwoInstruction(selected_input_value, instruction);
+					inputs[selected_input] = merged_instruction;
+					handleHorizontalMove(true);
 
 					return;
 				}
@@ -168,7 +166,22 @@
 					input_rubik?.pushMove(inputs[selected_input], true);
 					inputs[selected_input] = instruction;
 				} else if (inputs.length < max_instructions) {
-					// if write a new instruction
+					// else if write a new instruction
+					if (!first_selected_instruction) {
+						// if the selected input is not the first
+
+						const previous_input_value = inputs[selected_input - 1];
+
+						if (previous_input_value != undefined && previous_input_value[0] === instruction[0]) {
+							// if overwrite same instruction type
+							const merged_instruction = mergeTwoInstruction(previous_input_value, instruction);
+							inputs[selected_input - 1] = merged_instruction;
+
+							return;
+						}
+					}
+
+					// add the new instruction
 					inputs = [...inputs, instruction];
 				}
 
