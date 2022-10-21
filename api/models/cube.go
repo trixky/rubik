@@ -138,6 +138,9 @@ func (c *Cube) rotateSequence(words []string) {
 }
 
 func (c *Cube) rotate(move string) {
+	if len(move) == 0 {
+		return
+	}
 	amount := 1
 	if len(move) == 2 {
 		if move[1] == '\'' {
