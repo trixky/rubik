@@ -43,6 +43,7 @@ func search(ctx context.Context, path []Cube, g int, bound int, group int, table
 	f := g + h
 
 	if f > bound {
+
 		return f
 	}
 	if h == 0 {
@@ -83,7 +84,9 @@ func idaStar(node *Cube, group int, tables *tables) {
 	ctx, cancel:= context.WithCancel(context.Background())
 
 	for _, move := range GetGroupMoves(group, *node) {
+		// succ2 := copyAndMove(node, move)
 		wg.Add(1)
+		// fmt.Println("bound", heuristic(succ2, group, tables))
 		go func(move string) {
 			defer wg.Done()
 			defer cancel() // cancel context once this goroutine ends
@@ -93,7 +96,9 @@ func idaStar(node *Cube, group int, tables *tables) {
 			path := []Cube{*succ}
 			for {
 				cost := search(ctx, path, 0, bound, group, tables)
+				// fmt.Println("bound", bound)
 				if cost == -1 {
+					// fmt.Println("bound found", bound)
 					return
 				}
 				bound = cost
@@ -147,6 +152,9 @@ func SolveSequence(server bool, verbose bool, sequence []string) []string {
 	}
 	if isSolved(node) == false {
 		fmt.Println("NOT SOLVED ???")
+		node.Print(-1)
+		fmt.Println("og sequence", sequence)
+		fmt.Println("solve sequence", totalSequenceSolve)
 	}
 	return totalSequenceSolve
 }

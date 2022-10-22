@@ -151,10 +151,9 @@
 						}
 					}
 				})
-				.catch((err) => {
+				.catch(() => {
 					loading = false;
 					alert('an error occured from api');
-					console.log(err)
 				});
 		}
 	}

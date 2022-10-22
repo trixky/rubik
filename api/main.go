@@ -7,13 +7,33 @@ import (
 	"strings"
 	"math/rand"
 
+	"gonum.org/v1/plot"
+    "gonum.org/v1/plot/plotter"
+    "gonum.org/v1/plot/vg"
+
 	"github.com/trixky/rubik/parser"
 	"github.com/trixky/rubik/models"
 	"github.com/trixky/rubik/server"
 )
 
-func doCorrection() {
-	fmt.Println("This will take 10 minutes.")
+
+func histPlot(values plotter.Values, filename string) {
+    p := plot.New()
+    p.Title.Text = "histogram plot"
+ 
+    hist, err := plotter.NewHist(values, 20)
+    if err != nil {
+        panic(err)
+    }
+    p.Add(hist)
+ 
+    if err := p.Save(3*vg.Inch, 3*vg.Inch, filename); err != nil {
+        panic(err)
+    }
+}
+
+func doCorrection(plot bool) {
+	fmt.Println("This will take about 8 minutes.")
 	fmt.Println()
 	source := rand.NewSource(time.Now().UnixNano())
 	randGen := rand.New(source)
@@ -21,7 +41,8 @@ func doCorrection() {
 	arrTime := []float64{}
 	arrSolLen := []float64{}
 
-	for i := 0; i < 100; i++ {
+	fmt.Println("50 solutions of size between 0 and 5:")
+	for i := 0; i < 50; i++ {
 		sequence := parser.RandomSequence(-1, randGen.Intn(6))
 		// fmt.Println("sequence ", i, ":", sequence)
 		start := time.Now()
@@ -39,7 +60,6 @@ func doCorrection() {
 		sumLen += arrSolLen[i]
 		sumTime += arrTime[i]
 	} 
-	fmt.Println("100 solutions of size between 0 and 5:")
 	fmt.Println("average solution length =", sumLen / float64(len(arrSolLen)), "moves")
 	fmt.Println("average solution time   =", sumTime / float64(len(arrSolLen)), "ms")
 	fmt.Println()
@@ -47,54 +67,70 @@ func doCorrection() {
 
 	arrTime = []float64{}
 	arrSolLen = []float64{}
+	var arrTimePlot plotter.Values
+	var arrSolPlot plotter.Values
 
-	for i := 0; i < 100; i++ {
+	fmt.Println("50 solutions of size between 5 and 20:")
+	for i := 0; i < 50; i++ {
 		sequence := parser.RandomSequence(5, randGen.Intn(21))
-		// fmt.Println("sequence ", i, ":", sequence)
+
 		start := time.Now()
 		result := models.SolveSequence(false, false, sequence)
-		// fmt.Println("Solve ", result)
 		duration := time.Since(start)
-		// fmt.Println("Len of", len(result), "that took", duration.Milliseconds(), "milliseconds")
-		// fmt.Println()
 
 		arrSolLen = append(arrSolLen, float64(len(result)))
 		arrTime = append(arrTime, float64(duration.Milliseconds()))
+
+		if plot == true {
+			arrSolPlot = append(arrSolPlot, float64(len(result)))
+			arrTimePlot = append(arrTimePlot, float64(float64(duration.Milliseconds()) / float64(500.0)))
+		}
 	}
 	sumLen, sumTime = 0.0, 0.0
 	for i := range arrTime {
 		sumLen += arrSolLen[i] 
 		sumTime += arrTime[i] 
-	} 
-	fmt.Println("100 solutions of size between 5 and 20:")
+	}
+	if plot == true {
+		histPlot(arrSolPlot, "png/5to20Sol.png")
+		histPlot(arrTimePlot, "png/5to20Time.png")
+	}
 	fmt.Println("average solution length =", sumLen / float64(len(arrSolLen)), "moves")
 	fmt.Println("average solution time   =", sumTime / float64(len(arrSolLen)), "ms")
 	fmt.Println()
-
+	
 
 	arrTime = []float64{}
 	arrSolLen = []float64{}
+	arrSolPlot = plotter.Values{}
+	arrTimePlot = plotter.Values{}
 
-	for i := 0; i < 100; i++ {
+	fmt.Println("50 solutions of size between 20 and 50:")
+	for i := 0; i < 50; i++ {
 		sequence := parser.RandomSequence(20, randGen.Intn(101))
-		// fmt.Println("sequence ", i, ":", sequence)
+		
 		start := time.Now()
 		result := models.SolveSequence(false, false, sequence)
-		// fmt.Println("Solve ", result)
 		duration := time.Since(start)
-		// fmt.Println("Len of", len(result), "that took", duration.Milliseconds(), "milliseconds")
-		// fmt.Println()
 
 		arrSolLen = append(arrSolLen, float64(len(result)))
 		arrTime = append(arrTime, float64(duration.Milliseconds()))
+	
+		if plot == true {
+			arrSolPlot = append(arrSolPlot, float64(len(result)))
+			arrTimePlot = append(arrTimePlot, float64(float64(duration.Milliseconds()) / float64(1000.0)))
+		}
 	}
 	sumLen, sumTime = 0.0, 0.0
 	for i := range arrTime {
 		sumLen += arrSolLen[i] 
 		sumTime += arrTime[i] 
 	} 
-	fmt.Println()
-	fmt.Println("100 solutions of size between 20 and 100:")
+	if plot == true {
+		histPlot(arrSolPlot, "png/20to100Sol.png")
+		histPlot(arrTimePlot, "png/20to100Time.png")
+	}
+
 	fmt.Println("average solution length =", sumLen / float64(len(arrSolLen)), "moves")
 	fmt.Println("average solution time   =", sumTime / float64(len(arrSolLen)), "ms")
 	fmt.Println()
@@ -205,26 +241,30 @@ func doCorrection() {
 	arrTime = []float64{}
 	arrSolLen = []float64{}
 
+	fmt.Println("101 Superflips:")
 	for _, val := range superflips {
 		start := time.Now()
 		result := models.SolveSequence(false, false, strings.Fields(val))
-		// fmt.Println("Solve ", result)
 		duration := time.Since(start)
-		// fmt.Println("Len of", len(result), "that took", duration.Milliseconds(), "milliseconds")
-		// fmt.Println()
 
 		arrSolLen = append(arrSolLen, float64(len(result)))
 		arrTime = append(arrTime, float64(duration.Milliseconds()))
+		if plot == true {
+			arrSolPlot = append(arrSolPlot, float64(len(result)))
+			arrTimePlot = append(arrTimePlot, float64(float64(duration.Milliseconds()) / float64(1000.0)))
+		}
 	}
 	sumLen, sumTime = 0.0, 0.0
 	for i := range arrTime {
 		sumLen += arrSolLen[i] 
 		sumTime += arrTime[i] 
 	} 
-	fmt.Println("100 Superflips:")
+	if plot == true {
+		histPlot(arrSolPlot, "png/superflipSol.png")
+		histPlot(arrTimePlot, "png/superflipTime.png")
+	}
 	fmt.Println("average solution length =", sumLen / float64(len(superflips)), "moves")
 	fmt.Println("average solution time   =", sumTime / float64(len(superflips)), "ms")
-	fmt.Println()
 
 }
 
@@ -235,10 +275,10 @@ func main() {
 	if api_mode {
 		server.Start()
 	} else {
-		verbose, random, correction, sequence := parser.ReadArgs()
+		verbose, random, correction, plot, sequence := parser.ReadArgs()
 		
 		if correction == true {
-			doCorrection()
+			doCorrection(plot)
 			return
 		}
 		if random == true {
