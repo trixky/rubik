@@ -1004,7 +1004,7 @@
 	}
 
 	.physic-button-container > button {
-		@apply border-solid border-[1px] rounded-md;
+		@apply border-solid border-[1px] border-black rounded-md;
 	}
 
 	.right-rotation {
@@ -1017,8 +1017,9 @@
 
 	.physic-button {
 		@apply border-none px-[7px] py-[8px];
-		font-weight: 500;
+		font-weight: 400;
 		background-color: #eee;
+		font-size: small;
 	}
 
 	.physic-button:not(disabled):not([disabled]):not(:disabled):hover {
