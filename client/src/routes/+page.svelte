@@ -576,7 +576,6 @@
 				if (inputs.length > 0) {
 					await tick();
 					input_rubik?.pushMove(inputs[0], false, RubikConfig.moves.durations.nitro);
-					await tick();
 					handleHorizontalSuperMove(true);
 				}
 			}
