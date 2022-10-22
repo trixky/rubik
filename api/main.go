@@ -105,7 +105,8 @@ func doCorrection(plot bool) {
 	arrSolPlot = plotter.Values{}
 	arrTimePlot = plotter.Values{}
 
-	for i := 0; i < 100; i++ {
+	fmt.Println("1000 solutions of size between 20 and 100:")
+	for i := 0; i < 1000; i++ {
 		sequence := parser.RandomSequence(20, randGen.Intn(101))
 		
 		start := time.Now()
@@ -130,7 +131,6 @@ func doCorrection(plot bool) {
 		histPlot(arrTimePlot, "png/20to100Time.png")
 	}
 
-	fmt.Println("100 solutions of size between 20 and 100:")
 	fmt.Println("average solution length =", sumLen / float64(len(arrSolLen)), "moves")
 	fmt.Println("average solution time   =", sumTime / float64(len(arrSolLen)), "ms")
 	fmt.Println()
