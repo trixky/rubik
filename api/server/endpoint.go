@@ -31,6 +31,5 @@ func resolve(w http.ResponseWriter, r *http.Request) {
 		strToFront += s + " "
 	}
 	
-	fmt.Println(strToFront)
 	fmt.Fprintf(w, strToFront)
 }
