@@ -17,8 +17,9 @@ func help() {
 	fmt.Println("  -r : creates a random sequence, overrides the sequence if one was given")
 	fmt.Println("  -v : writes a more detailed solve (sequence, length of sequence and time per group transformation)")
 	fmt.Println("  -c : correction subject (takes ~10 minutes)")
+	fmt.Println("  -p : plot for correction, overrides existing png")
 	fmt.Println("Example : go run . -v \"F R U2 B' R' L D2\"")
-	os.Exit(1)
+	os.Exit(0)
 }
 
 
@@ -29,7 +30,7 @@ func wrongInputUsage(wrong string) {
 	fmt.Println("Each move seperated by whitespace(s).")
 	fmt.Println("Can't input two sequences.")
 	fmt.Println("Example : go run . \"F R U2 B' R' L D2\"")
-	os.Exit(1)
+	os.Exit(0)
 }
 
 
@@ -67,9 +68,9 @@ func isValidShuffle(words []string) (bool, string) {
 		verbose, random: boolean depicting those options
 		api_mode: false if no api, yes if it has to start
 */
-func ReadArgs() (verbose bool, random bool, correction bool, sequence []string) {
+func ReadArgs() (verbose bool, random bool, correction bool, plot bool, sequence []string) {
 	sequence_exists := false
-	verbose, random, correction = false, false, false
+	verbose, random, correction, plot = false, false, false, false
 	sequence = []string{}
 
 	args := os.Args[1:]
@@ -82,7 +83,8 @@ func ReadArgs() (verbose bool, random bool, correction bool, sequence []string) 
 			random = true
 		} else if arg == "-c" || arg == "--correction" {
 			correction = true
-			return
+		} else if arg == "-p" || arg == "--plot" {
+			plot = true
 		} else {
 			if (string(arg[0]) == "-") {
 				wrongInputUsage("option: " + arg + " is not an option")
@@ -101,6 +103,9 @@ func ReadArgs() (verbose bool, random bool, correction bool, sequence []string) 
 		}
 	}
 
+	if correction {
+		return
+	}
 	if sequence_exists == false && random == false {
 		wrongInputUsage("no sequence (written or random)")
 	}
