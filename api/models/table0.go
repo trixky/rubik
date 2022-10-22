@@ -2,10 +2,12 @@ package models
 
 import (
 	"os"
+	"io"
 	"fmt"
 	"log"
 	"time"
 	"errors"
+	"crypto/sha256"
 )
 
 // group 0 -> group 1 : edge orientation
@@ -79,6 +81,20 @@ func setTable0(tables *tables) {
 			}
 		}
 	} else {
+		f, err := os.Open("pruningTables/Table0")
+		if err != nil {
+		  log.Fatal(err)
+		}
+		defer f.Close()
+		h := sha256.New()
+		if _, err := io.Copy(h, f); err != nil {
+			log.Fatal(err)
+		}
+		strSha256 := fmt.Sprintf("%x", h.Sum(nil))
+		if strSha256 != "adc07ef872db78f680433ac7eb7b5807c431530b4380696785b938f0c17581ca" {
+			log.Fatal("Table0 has wrong sha256 hash. Please delete it and launch cmd again.")
+		}
+
 		content, err := os.ReadFile("pruningTables/Table0")
 		if err != nil {
 			fmt.Println("failed to read pruning table file")

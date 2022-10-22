@@ -2,10 +2,12 @@ package models
 
 import (
 	"os"
+	"io"
 	"fmt"
 	"log"
 	"time"
 	"errors"
+	"crypto/sha256"
 )
 
 
@@ -162,6 +164,20 @@ func setTable2(tables *tables) {
 			}
 		}
 	} else {
+		f, err := os.Open("pruningTables/Table2")
+		if err != nil {
+		  log.Fatal(err)
+		}
+		defer f.Close()
+		h := sha256.New()
+		if _, err := io.Copy(h, f); err != nil {
+			log.Fatal(err)
+		}
+		strSha256 := fmt.Sprintf("%x", h.Sum(nil))
+		if strSha256 != "72b204274fed87660b5647c121325f0f97e285d7cc0e12ab6a0906a1a2a9b1c7" {
+			log.Fatal("Table2 has wrong sha256 hash. Please delete it and launch cmd again.")
+		}
+
 		content, err := os.ReadFile("pruningTables/Table2")
 		if err != nil {
 			fmt.Println("failed to read pruning table file")

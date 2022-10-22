@@ -16,6 +16,7 @@ func help() {
 	fmt.Println("  -h : prints this message and exits")
 	fmt.Println("  -r : creates a random sequence, overrides the sequence if one was given")
 	fmt.Println("  -v : writes a more detailed solve (sequence, length of sequence and time per group transformation)")
+	fmt.Println("  -c : correction subject (takes ~10 minutes)")
 	fmt.Println("Example : go run . -v \"F R U2 B' R' L D2\"")
 	os.Exit(1)
 }
