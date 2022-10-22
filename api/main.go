@@ -41,8 +41,8 @@ func doCorrection(plot bool) {
 	arrTime := []float64{}
 	arrSolLen := []float64{}
 
-	fmt.Println("100 solutions of size between 0 and 5:")
-	for i := 0; i < 100; i++ {
+	fmt.Println("50 solutions of size between 0 and 5:")
+	for i := 0; i < 50; i++ {
 		sequence := parser.RandomSequence(-1, randGen.Intn(6))
 		// fmt.Println("sequence ", i, ":", sequence)
 		start := time.Now()
@@ -70,8 +70,8 @@ func doCorrection(plot bool) {
 	var arrTimePlot plotter.Values
 	var arrSolPlot plotter.Values
 
-	fmt.Println("100 solutions of size between 5 and 20:")
-	for i := 0; i < 100; i++ {
+	fmt.Println("50 solutions of size between 5 and 20:")
+	for i := 0; i < 50; i++ {
 		sequence := parser.RandomSequence(5, randGen.Intn(21))
 
 		start := time.Now()
@@ -83,7 +83,7 @@ func doCorrection(plot bool) {
 
 		if plot == true {
 			arrSolPlot = append(arrSolPlot, float64(len(result)))
-			arrTimePlot = append(arrTimePlot, float64(float64(duration.Milliseconds()) / float64(1000.0)))
+			arrTimePlot = append(arrTimePlot, float64(float64(duration.Milliseconds()) / float64(500.0)))
 		}
 	}
 	sumLen, sumTime = 0.0, 0.0
@@ -105,8 +105,8 @@ func doCorrection(plot bool) {
 	arrSolPlot = plotter.Values{}
 	arrTimePlot = plotter.Values{}
 
-	fmt.Println("1000 solutions of size between 20 and 100:")
-	for i := 0; i < 1000; i++ {
+	fmt.Println("50 solutions of size between 20 and 50:")
+	for i := 0; i < 50; i++ {
 		sequence := parser.RandomSequence(20, randGen.Intn(101))
 		
 		start := time.Now()
@@ -241,7 +241,7 @@ func doCorrection(plot bool) {
 	arrTime = []float64{}
 	arrSolLen = []float64{}
 
-	fmt.Println("100 Superflips:")
+	fmt.Println("101 Superflips:")
 	for _, val := range superflips {
 		start := time.Now()
 		result := models.SolveSequence(false, false, strings.Fields(val))
