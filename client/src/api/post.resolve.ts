@@ -3,6 +3,7 @@ import ApiConfig from './config';
 function postResolve(input: string): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
 		const url = `http://${ApiConfig.origin}:${ApiConfig.port}/resolve`;
+		console.log("url:", url)
 
 		fetch(url, {
 			method: 'POST',

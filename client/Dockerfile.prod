@@ -1,0 +1,22 @@
+FROM node:16-alpine3.15 as builder
+
+# copy client files
+WORKDIR /app
+COPY ./client .
+
+# remove local node modules
+RUN rm -rf /app/node_modules
+
+# install client dependencies
+RUN npm install
+
+# compile client
+RUN npm run build
+
+FROM builder
+
+# copy client builded files
+WORKDIR /app
+COPY --from=builder /app .
+
+ENTRYPOINT node ./production/index.js

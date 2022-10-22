@@ -1,0 +1,20 @@
+FROM golang:1.18.3-alpine3.16 as builder
+
+# copy api files
+WORKDIR /api/app
+COPY ./api /api/app
+
+# install api dependencies
+RUN go mod download
+
+# compile api
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags "all=-N -l" -o ./rubik
+
+FROM alpine:3.16.2
+
+# copy executable and pruning tables
+WORKDIR /production
+COPY --from=builder /api/app/rubik /production/rubik
+COPY --from=builder /api/app/pruningTables /production/pruningTables
+
+ENTRYPOINT /production/rubik

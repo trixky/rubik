@@ -1,4 +1,6 @@
+import { env } from '$env/dynamic/public';
+
 export default {
-	origin: import.meta.env.VITE_DOMAIN ?? 'localhost',
-	port: import.meta.env.VITE_API_PORT
+	origin: env.PUBLIC_DOMAIN ?? 'localhost',
+	port: env.PUBLIC_API_PORT
 };

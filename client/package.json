@@ -33,6 +33,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@sveltejs/adapter-node": "^1.0.0-next.99",
 		"@types/gsap": "^3.0.0",
 		"@types/three": "^0.144.0",
 		"gsap": "^3.11.3",
