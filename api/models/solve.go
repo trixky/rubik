@@ -152,6 +152,9 @@ func SolveSequence(server bool, verbose bool, sequence []string) []string {
 	}
 	if isSolved(node) == false {
 		fmt.Println("NOT SOLVED ???")
+		node.Print(-1)
+		fmt.Println("og sequence", sequence)
+		fmt.Println("solve sequence", totalSequenceSolve)
 	}
 	return totalSequenceSolve
 }

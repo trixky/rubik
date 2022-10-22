@@ -33,7 +33,7 @@ func histPlot(values plotter.Values, filename string) {
 }
 
 func doCorrection(plot bool) {
-	fmt.Println("This will take 10 minutes.")
+	fmt.Println("This will take about 8 minutes.")
 	fmt.Println()
 	source := rand.NewSource(time.Now().UnixNano())
 	randGen := rand.New(source)
