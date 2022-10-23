@@ -86,7 +86,7 @@ func ReadArgs() (verbose bool, random bool, correction bool, plot bool, sequence
 		} else if arg == "-p" || arg == "--plot" {
 			plot = true
 		} else {
-			if (string(arg[0]) == "-") {
+			if (len(arg) > 0 && string(arg[0]) == "-") {
 				wrongInputUsage("option: " + arg + " is not an option")
 			}
 			if sequence_exists == true {
