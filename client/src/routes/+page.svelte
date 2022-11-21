@@ -654,6 +654,7 @@
 			navigator.clipboard.readText().then((cliptext) => {
 				try {
 					const clip_instructions = SanitizeInput(cliptext);
+					selected_input = clip_instructions.length
 					inputs = clip_instructions;
 				} catch {
 					alert('input bad formatted');
