@@ -19,4 +19,4 @@ FROM builder
 WORKDIR /app
 COPY --from=builder /app .
 
-ENTRYPOINT node ./production/index.js
+ENTRYPOINT PORT=${CLIENT_PORT} node ./production/index.js
