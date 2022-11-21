@@ -8,12 +8,12 @@ A 3D rubik resolver online, using the [Morwen Thistlethwaite](https://en.wikiped
 
 The notation used is the one used globally:
 
-- F: front
-- R: right
-- U: up
-- B: back
-- L: left
-- D: down
+- __F__: front
+- __R__: right
+- __U__: up
+- __B__: back
+- __L__: left
+- __D__: down
 
 You can add "__F2__" *(double)* instead of "__F F__", and "__F'__" *(reverse)* instead of "__F F F__".
 
